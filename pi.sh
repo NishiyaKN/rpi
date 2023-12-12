@@ -149,9 +149,6 @@ dig google.com @127.0.0.1 -p 5335
 # Go to the admin webpage
 'Side bar -> Settings -> DNS ->[clear upstream dns servers -> add Custom 1(IPv4) as [127.0.0.1#5335] -> save'
 
-### Pihole log file ###
-# https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/
-vim /var/log/pihole.log
 
 ### Unbound optimization ### 
 # https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/
@@ -171,3 +168,7 @@ rrset-cache-size: 64m
 
 sudo service unbound restart
 sudo service unbound status
+
+### Pihole log file ###
+# https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/
+vim /var/log/pihole.log
