@@ -1,4 +1,4 @@
-alias temp="/home/iriya/scripts/temp.sh"
+alias temp="/home/iriya/rpi/scripts/temp.sh"
 alias shutdown="sudo shutdown now"
 alias reboot="sudo reboot now"
 alias tp="$HOME/rpi/scripts/tel.sh"
