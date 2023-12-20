@@ -12,8 +12,15 @@ pip3 install beautifulsoup4 lxml pandas
 sudo apt install vim kitty
 
 ###########################################################
+### ADJUST SWAPPINESS ###
+sysctl vm.swappiness # Probably will be 60
+sudo vim /etc/sysctl.d/99-swappiness.conf
+# Add the following line:
+vm.swappiness=10
+
+###########################################################
 ### Lowering power consumption ###
-# https://www.cnx-software.com/2021/12/09/raspberry-pi-zero-2-w-power-consumption/
+https://www.cnx-software.com/2021/12/09/raspberry-pi-zero-2-w-power-consumption/
 
 sudo vi /boot/config.txt
 
@@ -38,7 +45,7 @@ sudo vi /etc/rc.local
 
 ###########################################################
 ### Installing pihole ###
-# https://www.crosstalksolutions.com/the-worlds-greatest-pi-hole-and-unbound-tutorial-2023/
+https://www.crosstalksolutions.com/the-worlds-greatest-pi-hole-and-unbound-tutorial-2023/
 
 # Set static IP for the rpi
 
@@ -137,7 +144,7 @@ sudo service unbound status # Should say active (running)
 # Test with
 dig google.com @127.0.0.1 -p 5335
 # On the 4th line, next to status it should be NOERROR
-    # If it says SERVERR then:
+    # If it says SERVFAIL then:
     sudo vi /etc/resolv.conf
     # Comment the last line, which should be
     # unbound_conf=/etc/unbound/unbound.conf.d/resolvconf_resolvers.conf
@@ -149,9 +156,8 @@ dig google.com @127.0.0.1 -p 5335
 # Go to the admin webpage
 'Side bar -> Settings -> DNS ->[clear upstream dns servers -> add Custom 1(IPv4) as [127.0.0.1#5335] -> save'
 
-
 ### Unbound optimization ### 
-# https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/
+https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/
 
 sudo vi /etc/dnsmasq.d/01-pihole.conf
 # Disable cache, since unbound already takes care of it
@@ -170,5 +176,21 @@ sudo service unbound restart
 sudo service unbound status
 
 ### Pihole log file ###
-# https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/
+https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/
+
 vim /var/log/pihole.log
+
+###########################################################
+### Python scripts ###
+https://patrikmojzis.medium.com/how-to-run-selenium-using-python-on-raspberry-pi-d3fe058f011
+https://stackoverflow.com/questions/32173839/easyprocess-easyprocesscheckinstallederror-cmd-xvfb-help-oserror-errno
+
+pip install pandas selenium plotly request beautifulsoup4
+sudo apt install xvfb
+pip install xvfbwrapper pyvirtualdisplay
+
+'
+from pyvirtualdisplay import Display
+display = Display(visible=0, size=(800, 600))
+display.start()
+'
