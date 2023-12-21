@@ -20,6 +20,11 @@ mv tmux.conf ../.tmux.conf
 tmux
 source .tmux.conf
 
+# Commit on github without the need to type the credentials
+git config --global credential.helper store
+git config --global user.email "email"
+git config --global user.name "name"
+
 ###########################################################
 ### CONFIGURE ZRAM ###
 git clone https://github.com/foundObjects/zram-swap
@@ -27,6 +32,17 @@ cd zram-swap
 sudo ./install.sh
 cd ..
 sudo mv zram-swap /opt
+
+# Test if it's working
+zramctl
+
+# See which compression algorithm it's using
+cat /sys/block/zram0/comp_algorithm
+
+# Change compression algorithm
+sudo vi /etc/default/zram-swap
+# Change to zstd for better compression ratio or lzo for best compression speed
+_zram_algorithm="zstd"
 
 ###########################################################
 ### Lowering power consumption ###
@@ -44,7 +60,7 @@ camera_auto_detect=0
 display_auto_detect=0
 
 # Disable HDMI
-raspi-config
+sudo raspi-config
 'Advanced options -> GL driver'
 # Install whatever packages are needed, then select the following option:
 'G1 Legacy'
@@ -195,7 +211,6 @@ vim /var/log/pihole.log
 https://patrikmojzis.medium.com/how-to-run-selenium-using-python-on-raspberry-pi-d3fe058f011
 https://stackoverflow.com/questions/32173839/easyprocess-easyprocesscheckinstallederror-cmd-xvfb-help-oserror-errno
 
-pip install pandas selenium plotly request beautifulsoup4
 sudo apt install xvfb
 pip install xvfbwrapper pyvirtualdisplay
 
