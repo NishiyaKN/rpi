@@ -5,18 +5,19 @@ kitty +kitten ssh user@hostname.local
 ### CONFIGURE RASPBERRY PI ZERO 2 W ###
 
 sudo apt update && sudo apt upgrade
-sudo apt install git pip -y
-pip3 install beautifulsoup4 lxml pandas
+sudo apt install git pip tmux -y
+pip3 install beautifulsoup4 lxml pandas selenium requests
 
 ### Optional packages ###
 sudo apt install vim kitty
 
 ###########################################################
-### ADJUST SWAPPINESS ###
-sysctl vm.swappiness # Probably will be 60
-sudo vim /etc/sysctl.d/99-swappiness.conf
-# Add the following line:
-vm.swappiness=10
+### CONFIGURE ZRAM ###
+git clone https://github.com/foundObjects/zram-swap
+cd zram-swap
+sudo ./install.sh
+cd ..
+sudo mv zram-swap /opt
 
 ###########################################################
 ### Lowering power consumption ###
