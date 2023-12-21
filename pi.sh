@@ -11,6 +11,15 @@ pip3 install beautifulsoup4 lxml pandas selenium requests
 ### Optional packages ###
 sudo apt install vim kitty
 
+### DOTFILES ###
+git clone https://github.com/KenichiNishiya/rpi.git
+cd rpi
+mv vimrc ../.vimrc
+mv bash_aliases ../bash_aliases
+mv tmux.conf ../.tmux.conf
+tmux
+source .tmux.conf
+
 ###########################################################
 ### CONFIGURE ZRAM ###
 git clone https://github.com/foundObjects/zram-swap
