@@ -5,7 +5,7 @@ kitty +kitten ssh user@hostname.local
 ### CONFIGURE RASPBERRY PI ZERO 2 W ###
 
 sudo apt update && sudo apt upgrade
-sudo apt install git pip tmux -y
+sudo apt install git pip tmux chromium-chromedriver chromium-browser -y
 pip3 install beautifulsoup4 lxml pandas selenium requests
 
 ### Optional packages ###
@@ -64,6 +64,9 @@ sudo raspi-config
 'Advanced options -> GL driver'
 # Install whatever packages are needed, then select the following option:
 'G1 Legacy'
+
+# Leave more RAM to CPU intead of GPU, put anywhere:
+gpu_mem=16
 
 sudo vi /etc/rc.local
 # Add the following line before exit 0:
