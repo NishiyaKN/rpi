@@ -1,0 +1,15 @@
+[Unit]
+Description=Notify via Discord for new Blue Archive banners
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+User=inaba
+ExecStart=/usr/bin/python3 /home/inaba/py/soup/new_banner.py
+
+[Install]
+WantedBy=multi-user.target
+

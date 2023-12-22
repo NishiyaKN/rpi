@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for ba-banner.service
+
+[Timer]
+OnUnitActiveSec=3h
+OnBootSec=1min
+
+[Install]
+WantedBy=timers.target
+
