@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 
 USER = 'inaba'
-FILENAME = '/home/' + USER + 'rpi/auto/ba/counter_normal.txt'
+FILENAME = '/home/' + USER + '/rpi/auto/ba/counter_normal.txt'
 AUTH_FILE = '/home/' + USER + '/.config/tk/dc'
 
 def main():

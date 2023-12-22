@@ -8,7 +8,7 @@ Type=simple
 Restart=on-failure
 RestartSec=10
 User=inaba
-ExecStart=/usr/bin/python3 /home/inaba/py/soup/new_banner.py
+ExecStart=/usr/bin/python3 /home/inaba/rpi/auto/ba/new_banner.py
 
 [Install]
 WantedBy=multi-user.target
