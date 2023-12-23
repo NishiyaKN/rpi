@@ -6,6 +6,7 @@ USER = 'inaba'
 FILENAME = '/home/' + USER + '/rpi/auto/ba/counter_normal.txt'
 AUTH_FILE = '/home/' + USER + '/.config/tk/dc'
 counter_today = 0
+file_counter_bak = None
 
 def main():
     # Gets the page html and the table lenght, use it to compare with the last table lenght registered
@@ -18,7 +19,6 @@ def main():
     global counter_today
     table_rows = table.find_all('tr')
     counter_today = len(table_rows)
-    print("counter today:" ,counter_today)
     query_counter(counter_today)
 
 def query_counter(counter_today):
@@ -32,6 +32,7 @@ def query_counter(counter_today):
     with open(FILENAME, "r") as f:
         global file_counter
         file_counter = int(f.read())
+        file_counter_bak = file_counter
         # if file_counter is empty, it will throw an error trying to parse to int
         if file_counter == "":
             print("Empty file, writing new value")
@@ -73,8 +74,12 @@ def create_dataframe():
 
 def notify_discord():
     # Read authorization token from local file
-    with open(AUTH_FILE,'r') as f:
-        auth = f.read()
+    try:
+        with open(AUTH_FILE,'r') as f:
+            auth = f.read()
+    except Exception as e:
+        print("Couldn't open file: ", e)
+        exit()
 
     url = 'https://discord.com/api/v9/channels/1180832500403155095/messages' 
     headers = {
@@ -84,7 +89,6 @@ def notify_discord():
     # Formulate the text string to be sent
     print(file_counter,counter_today)
     for i in range(file_counter - 1, counter_today - 1):
-        #print(df.loc[i]['Character'], i)
         character = df.loc[i]['Character'].rsplit('rerun', 1)[0]
         period = df.loc[i]['Period']
         payload = {
@@ -96,4 +100,11 @@ def notify_discord():
         print("Notification was sent")
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("Something went wrong", e)
+        if file_counter_bak != 0:
+            with open(FILENAME, 'w') as f:
+                f.write(str(file_counter_bak))
+        exit()
