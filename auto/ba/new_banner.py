@@ -5,6 +5,7 @@ import pandas as pd
 USER = 'inaba'
 FILENAME = '/home/' + USER + '/rpi/auto/ba/counter_normal.txt'
 AUTH_FILE = '/home/' + USER + '/.config/tk/dc'
+counter_today = 0
 
 def main():
     # Gets the page html and the table lenght, use it to compare with the last table lenght registered
@@ -14,8 +15,10 @@ def main():
     global table
     table = soup.find('table')
     global table_rows
+    global counter_today
     table_rows = table.find_all('tr')
     counter_today = len(table_rows)
+    print("counter today:" ,counter_today)
     query_counter(counter_today)
 
 def query_counter(counter_today):
@@ -28,7 +31,7 @@ def query_counter(counter_today):
 
     with open(FILENAME, "r") as f:
         global file_counter
-        file_counter = f.read()
+        file_counter = int(f.read())
         # if file_counter is empty, it will throw an error trying to parse to int
         if file_counter == "":
             print("Empty file, writing new value")
@@ -45,8 +48,8 @@ def update_counter(counter_today):
         with open(FILENAME, 'w') as f:
             f.write(str(counter_today))
             print("Updated counter")
-    except Exception:
-        print("Could not open file to write")
+    except Exception as e:
+        print("Could not open file to write: ", e)
     create_dataframe()
 
 def create_dataframe():
@@ -79,14 +82,18 @@ def notify_discord():
     }
 
     # Formulate the text string to be sent
-    for i in range(file_counter, counter_today - 1):
-        character = df.loc[i]['Character'].rstrip('rerun')
+    print(file_counter,counter_today)
+    for i in range(file_counter - 1, counter_today - 1):
+        #print(df.loc[i]['Character'], i)
+        character = df.loc[i]['Character'].rsplit('rerun', 1)[0]
         period = df.loc[i]['Period']
         payload = {
-                "content": "New banner: " + character + ". Period: " + period
+                "content": "New banner (" + str(i) + ") : **" + character + "**. Period: " + period
         }
+        print(payload)
 
         res = requests.post(url, payload, headers=headers)
+        print("Notification was sent")
 
 if __name__ == '__main__':
     main()
