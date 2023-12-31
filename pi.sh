@@ -1,11 +1,13 @@
 #!/bin/bash
+# 68.7M RAM usage on idle
+# 1.4G disk usage
 ### SSH with kitty ###
 kitty +kitten ssh user@hostname.local
 
 ### CONFIGURE RASPBERRY PI ZERO 2 W ###
 
-sudo apt update && sudo apt upgrade
-sudo apt install git pip tmux chromium-chromedriver chromium-browser -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git pip tmux chromium-chromedriver chromium-browser # on raw Debian its chromium and chromium-driver
 pip3 install beautifulsoup4 lxml pandas selenium requests
 
 ### Optional packages ###
@@ -14,11 +16,11 @@ sudo apt install vim kitty
 ### DOTFILES ###
 git clone https://github.com/KenichiNishiya/rpi.git
 cd rpi
-mv vimrc ../.vimrc
-mv bash_aliases ../bash_aliases
-mv tmux.conf ../.tmux.conf
+cp vimrc ../.vimrc
+cp bash_aliases ../.bash_aliases
+cp tmux.conf ../.tmux.conf
 tmux
-source .tmux.conf
+tmux source .tmux.conf
 
 # Commit on github without the need to type the credentials
 git config --global credential.helper store
@@ -42,11 +44,11 @@ cat /sys/block/zram0/comp_algorithm
 # Change compression algorithm
 sudo vi /etc/default/zram-swap
 # Change to zstd for better compression ratio or lzo for best compression speed
-_zram_algorithm="zstd"
+_zram_algorithm="lzo"
 
 ###########################################################
 ### Lowering power consumption ###
-https://www.cnx-software.com/2021/12/09/raspberry-pi-zero-2-w-power-consumption/
+'https://www.cnx-software.com/2021/12/09/raspberry-pi-zero-2-w-power-consumption/'
 
 sudo vi /boot/config.txt
 
@@ -59,14 +61,15 @@ camera_auto_detect=0
 # Disable display L59
 display_auto_detect=0
 
+# Leave more RAM to CPU intead of GPU, put anywhere:
+gpu_mem=16
+
 # Disable HDMI
 sudo raspi-config
 'Advanced options -> GL driver'
 # Install whatever packages are needed, then select the following option:
 'G1 Legacy'
 
-# Leave more RAM to CPU intead of GPU, put anywhere:
-gpu_mem=16
 
 sudo vi /etc/rc.local
 # Add the following line before exit 0:
@@ -74,7 +77,7 @@ sudo vi /etc/rc.local
 
 ###########################################################
 ### Installing pihole ###
-https://www.crosstalksolutions.com/the-worlds-greatest-pi-hole-and-unbound-tutorial-2023/
+'https://www.crosstalksolutions.com/the-worlds-greatest-pi-hole-and-unbound-tutorial-2023/'
 
 # Set static IP for the rpi
 
@@ -97,7 +100,7 @@ sudo vi /etc/pihole/pihole-FTL.conf
 RATE_LIMIT=0/0
 
 # Set unbound
-sudo apt install unboud -y
+sudo apt install unbound -y
 sudo vi /etc/unbound/unbound.conf.d/pi-hole.conf
 # Paste the following:
 '
@@ -168,16 +171,17 @@ private-address: 10.0.0.0/8
 private-address: fd00::/8
 private-address: fe80::/10
 '
+
 sudo service unbound restart
 sudo service unbound status # Should say active (running)
 # Test with
 dig google.com @127.0.0.1 -p 5335
 # On the 4th line, next to status it should be NOERROR
     # If it says SERVFAIL then:
-    sudo vi /etc/resolv.conf
+    sudo vi /etc/resolvconf.conf
     # Comment the last line, which should be
     # unbound_conf=/etc/unbound/unbound.conf.d/resolvconf_resolvers.conf
-    sudo rm /etc/unbound/unbound_conf.d/resolvconf_resolvers.conf
+    sudo rm /etc/unbound/unbound.conf.d/resolvconf_resolvers.conf
     sudo service unbound restart
     # Test again
     dig google.com @127.0.0.1 -p 5335
@@ -186,7 +190,7 @@ dig google.com @127.0.0.1 -p 5335
 'Side bar -> Settings -> DNS ->[clear upstream dns servers -> add Custom 1(IPv4) as [127.0.0.1#5335] -> save'
 
 ### Unbound optimization ### 
-https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/
+'https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/'
 
 sudo vi /etc/dnsmasq.d/01-pihole.conf
 # Disable cache, since unbound already takes care of it
@@ -205,20 +209,32 @@ sudo service unbound restart
 sudo service unbound status
 
 ### Pihole log file ###
-https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/
+'https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/'
 
 vim /var/log/pihole.log
 
 ###########################################################
 ### Python scripts ###
-https://patrikmojzis.medium.com/how-to-run-selenium-using-python-on-raspberry-pi-d3fe058f011
-https://stackoverflow.com/questions/32173839/easyprocess-easyprocesscheckinstallederror-cmd-xvfb-help-oserror-errno
 
-sudo apt install xvfb
-pip install xvfbwrapper pyvirtualdisplay
+cd 
+git clone https://github.com/KenichiNishiya/pyrice-logger.git
 
-'
-from pyvirtualdisplay import Display
-display = Display(visible=0, size=(800, 600))
-display.start()
-'
+# Change the username on those config files
+vi $HOME/rpi/auto/ba/ba-banner.service
+vi $HOME/pyrice-logger/asus/asus.service
+sudo cp $HOME/rpi/auto/ba/ba-banner.* /etc/systemd/system
+sudo cp $HOME/pyrice-logger/asus/asus.* /etc/systemd/system
+sudo systemctl enable --now ba-banner.timer
+sudo systemctl enable --now asus.timer
+
+# https://patrikmojzis.medium.com/how-to-run-selenium-using-python-on-raspberry-pi-d3fe058f011
+# https://stackoverflow.com/questions/32173839/easyprocess-easyprocesscheckinstallederror-cmd-xvfb-help-oserror-errno
+
+# sudo apt install xvfb
+# pip install xvfbwrapper pyvirtualdisplay
+
+# '
+# from pyvirtualdisplay import Display
+# display = Display(visible=0, size=(800, 600))
+# display.start()
+# '
