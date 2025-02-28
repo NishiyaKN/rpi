@@ -250,3 +250,6 @@ cmake ..
 make && sudo make install
 
 ttyd --credential user:passwd --writable --port 3000 --cwd /home/zero bash
+
+sudo cp ~/rpi/auto/ttyd.service /etc/systemd/system/ttyd.service
+sudo systemctl enable --now ttyd.service
