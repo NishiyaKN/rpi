@@ -238,3 +238,15 @@ sudo systemctl enable --now asus.timer
 # display = Display(visible=0, size=(800, 600))
 # display.start()
 # '
+
+###########################################################
+### ttyd (web based terminal) ###
+
+sudo apt-get update
+sudo apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev
+git clone https://github.com/tsl0922/ttyd.git
+cd ttyd && mkdir build && cd build
+cmake ..
+make && sudo make install
+
+ttyd --credential user:passwd --writable --port 3000 --cwd /home/zero bash
