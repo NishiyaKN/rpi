@@ -239,6 +239,21 @@ sudo systemctl enable --now asus.timer
 # display.start()
 # '
 
+sudo apt install python3-numpy python3-selenium python3-plotly python3-pandas python3-bs4
+
+### GECKODRIVER ###
+# Download the ARM64 compatible binary
+wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux-aarch64.tar.gz
+
+# Extract and install
+tar -xvzf geckodriver-v0.34.0-linux-aarch64.tar.gz
+sudo mv geckodriver /usr/local/bin/
+sudo chmod +x /usr/local/bin/geckodriver
+
+sudo apt update
+sudo apt install firefox-esr -y
+
+
 ###########################################################
 ### ttyd (web based terminal) ###
 
@@ -253,3 +268,30 @@ ttyd --credential user:passwd --writable --port 3000 --cwd /home/zero bash
 
 sudo cp ~/rpi/auto/ttyd.service /etc/systemd/system/ttyd.service
 sudo systemctl enable --now ttyd.service
+
+###########################################################
+### DOCKER ###
+# https://blog.rosnertech.com.br/arquivos/756
+
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io -y
+
+sudo systemctl start docker
+sudo systemctl enable docker
+
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker --version
+
+### DOCKER COMPOSE ###
+
+sudo curl -l "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
