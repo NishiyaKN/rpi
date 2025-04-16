@@ -1,11 +1,20 @@
+# This script creation was heavily assisted by AI using the scripts from asus and pc_hardware directories as a base
+
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from datetime import datetime
 import json
 import time
 import requests
 import os
-from pathlib import Path
-from bs4 import BeautifulSoup
-import re
+from pathlib import Path  
+import atexit
+import threading
 
 # Base directory (configurable via env var, defaults to /data)
 BASE_DIR = Path(os.getenv("DATA_DIR", "/app"))
@@ -17,6 +26,28 @@ AUTH_FILE = BASE_DIR / "dc"
 
 # Create directory if needed
 BASE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Global service management
+_service_lock = threading.Lock()
+_gecko_service = None
+
+def get_webdriver():
+    """Creates a new browser instance with a dedicated service"""
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.set_preference("browser.cache.disk.enable", False)
+    options.set_preference("browser.cache.memory.enable", False)
+    options.set_preference("browser.cache.offline.enable", False)
+    
+    # Create NEW service for each browser instance
+    service = Service(
+        executable_path='/usr/local/bin/geckodriver',
+        log_path='/tmp/geckodriver.log'
+    )
+    return webdriver.Firefox(service=service, options=options)
 
 # Initialize JSON files
 try:
@@ -34,7 +65,38 @@ try:
 except FileExistsError:
     print(f"{PRICES_FILE} already exists")
 
+# Configure service ONCE at startup
+# gecko_service = Service(
+#     executable_path='/usr/local/bin/geckodriver',
+#     log_path='/tmp/geckodriver.log'  # For debugging
+# )
+# gecko_service.start()  # Explicitly start service
+# atexit.register(gecko_service.stop)  # Ensure cleanup
+
+# # Ensure service stops when program exits
+# atexit.register(lambda: gecko_service.stop())
+
+# # Browser setup
+# options = Options()
+# options.add_argument("--headless")
+
 price_error = ""
+
+def close_terabyte_popups(browser):
+    """Handles Terabyte popups"""
+    try:
+        try:
+            WebDriverWait(browser, 3).until(
+                EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[src*='modal']"))
+            )
+            browser.find_element(By.CSS_SELECTOR, "button.tsG0HQh7bcmTha7pyanx-btn-close").click()
+            browser.switch_to.default_content()
+        except:
+            pass
+        
+        browser.find_element(By.CSS_SELECTOR, "span.fa-times").click()
+    except:
+        pass
 
 def notify_discord(component, new_price, old_price=None):
     """Send price alerts to Discord"""
@@ -61,52 +123,42 @@ def notify_discord(component, new_price, old_price=None):
     except Exception as e:
         print(f"Discord error: {str(e)}")
 
-def parse_price(price_str):
-    """Extract price from string"""
-    # Find all numbers with possible decimal separators
-    matches = re.findall(r'[\d.,]+', price_str)
-    if not matches:
-        raise ValueError("No price found in string")
-    
-    # Take the first match and normalize it
-    price = matches[0].replace('.', '').replace(',', '.')
-    return price
+def parse_selector(selector_str):
+    """Convert 'TYPE:value' to Selenium locator"""
+    try:
+        selector_type, value = selector_str.split(':', 1)
+        return (getattr(By, selector_type), value)
+    except:
+        raise ValueError(f"Invalid selector format: {selector_str}")
 
 def get_price(product):
     global price_error
+    browser = None
     try:
         print(f"\n🔍 Checking {product['name']}...")
+        browser = get_webdriver()  # Get fresh browser instance
+        browser.set_page_load_timeout(240) 
+
+        browser.get(product['url'])
+        # time.sleep(random.uniform(2,4)) 
         
-        # Set headers to mimic a browser
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        if 'popup_handler' in product:
+            globals()[product['popup_handler']](browser)
         
-        # Make the request
-        response = requests.get(product['url'], headers=headers)
-        response.raise_for_status()  # Raise an error for bad status codes
+        locator_type, locator_value = parse_selector(product['price_selector'])
+        price_element = WebDriverWait(browser, 15).until(
+            EC.visibility_of_element_located((locator_type, locator_value))
+        )
+        price_text = price_element.text
         
-        # Parse with BeautifulSoup
-        soup = BeautifulSoup(response.text, 'html.parser')
+        if not price_text or "R$ 0,00" in price_text:
+            raise ValueError("Invalid price format")
         
-        # Extract price based on selector
-        selector_type, selector_value = product['price_selector'].split(':', 1)
-        
-        if selector_type == 'CSS_SELECTOR':
-            price_element = soup.select_one(selector_value)
-        elif selector_type == 'XPATH':
-            # BeautifulSoup doesn't support XPath directly, so we'll use a workaround
-            # Note: This is a simplified XPath support - for complex XPaths you might need lxml
-            price_element = soup.find(selector_value)
-        else:
-            raise ValueError(f"Unsupported selector type: {selector_type}")
-        
-        if not price_element:
-            raise ValueError("Price element not found")
-        
-        price_text = price_element.get_text(strip=True)
-        current_price = parse_price(price_text)
-        
+        current_price = (
+            price_text.split()[1].replace(".","").replace(",",".")
+            if "T - " in product['name']
+            else price_text.replace("R$","").strip().replace(".","").replace(",",".")
+        )
         print(f"  ✅ Current price: R$ {current_price}")
 
         with open(PRICES_FILE, 'r+') as f:
@@ -153,14 +205,19 @@ def get_price(product):
         print(f"  ❌ Failed: {str(e)}")
         price_error += f"{product['name']}, "
     finally:
-        time.sleep(2)  # Be polite with requests
+        if browser:
+            try:
+                browser.quit()
+            except:
+                os.system("pkill -f geckodriver") # Force cleanup
+        time.sleep(5) # Cooldown between scrapes
 
 # Main execution
 if __name__ == '__main__':
     print(f"Starting price check at {datetime.now()}")
     price_error = ""
     for product in products:
-        print(f"\n🔍 Trying to get product: {product['name']}")
+        print(f"\n🔍 Trying to get product: {product['name']}")  # Added this line
         get_price(product)
     
     if price_error:

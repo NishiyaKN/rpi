@@ -1,1 +1,1 @@
-*/2 * * * * root cd /app && /usr/local/bin/python /app/getprices.py >> /var/log/cron.log 2>&1
+0 * * * * root cd /app && /usr/local/bin/python /app/getprices.py >> /var/log/cron.log 2>&1
