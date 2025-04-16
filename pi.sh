@@ -295,3 +295,24 @@ docker --version
 sudo curl -l "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
+
+### ZSWAP ###
+
+sudo apt install zram-tools
+sudo systemctl enable --now zramswap
+sudo vi /etc/default/zramswap
+# Set priority to 100, algo to zstd for best compression/cpu balance, zlib for best compression, lz4 for best cpu speed
+# You can see available algo with:
+cat /sys/block/zram0/comp_algorithm
+
+# Disable swap usage (MAY NEED TO POWER OFF AND ON AGAIN)
+sudo swapoff -a
+
+# If swap is a partition, comment out in
+sudo vi /etc/fstab
+
+# If swap if a file, then
+sudo dphys-swapfile swapoff
+
+# See if it's working
+swapon --show

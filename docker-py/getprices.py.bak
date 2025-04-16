@@ -1,0 +1,168 @@
+from datetime import datetime
+import json
+import time
+import requests
+import os
+from pathlib import Path
+from bs4 import BeautifulSoup
+import re
+
+# Base directory (configurable via env var, defaults to /data)
+BASE_DIR = Path(os.getenv("DATA_DIR", "/app"))
+
+# File paths (all relative to BASE_DIR)
+PRODUCTS_FILE = BASE_DIR / "products.json"
+PRICES_FILE = BASE_DIR / "price.json"
+AUTH_FILE = BASE_DIR / "dc"
+
+# Create directory if needed
+BASE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Initialize JSON files
+try:
+    with open(PRODUCTS_FILE) as f:
+        products = json.load(f)['products']
+    print(f"Loaded {len(products)} products from {PRODUCTS_FILE}")
+except FileNotFoundError:
+    print(f"Error: {PRODUCTS_FILE} not found")
+    exit()
+
+try:
+    with open(PRICES_FILE, "x") as f:
+        json.dump({p['name']: [] for p in products}, f, indent=4)
+    print(f"Created new {PRICES_FILE}")
+except FileExistsError:
+    print(f"{PRICES_FILE} already exists")
+
+price_error = ""
+
+def notify_discord(component, new_price, old_price=None):
+    """Send price alerts to Discord"""
+    try:
+        with open(AUTH_FILE) as f:
+            token = f.read().strip()
+        
+        if old_price:
+            change = float(new_price) - float(old_price)
+            message = (
+                f"🔻 Price drop for {component}\n"
+                f"Was: R$ {old_price}\n"
+                f"Now: R$ {new_price}\n"
+                f"Saved: R$ {abs(change):.2f} ({abs(change)/float(old_price)*100:.1f}%)"
+            )
+        else:
+            message = f"📊 New tracking for {component}: R$ {new_price}"
+            
+        requests.post(
+            "https://discord.com/api/v9/channels/1180832500403155095/messages",
+            json={"content": message},
+            headers={"Authorization": f"Bot {token}", "Content-Type": "application/json"}
+        )
+    except Exception as e:
+        print(f"Discord error: {str(e)}")
+
+def parse_price(price_str):
+    """Extract price from string"""
+    # Find all numbers with possible decimal separators
+    matches = re.findall(r'[\d.,]+', price_str)
+    if not matches:
+        raise ValueError("No price found in string")
+    
+    # Take the first match and normalize it
+    price = matches[0].replace('.', '').replace(',', '.')
+    return price
+
+def get_price(product):
+    global price_error
+    try:
+        print(f"\n🔍 Checking {product['name']}...")
+        
+        # Set headers to mimic a browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        # Make the request
+        response = requests.get(product['url'], headers=headers)
+        response.raise_for_status()  # Raise an error for bad status codes
+        
+        # Parse with BeautifulSoup
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract price based on selector
+        selector_type, selector_value = product['price_selector'].split(':', 1)
+        
+        if selector_type == 'CSS_SELECTOR':
+            price_element = soup.select_one(selector_value)
+        elif selector_type == 'XPATH':
+            # BeautifulSoup doesn't support XPath directly, so we'll use a workaround
+            # Note: This is a simplified XPath support - for complex XPaths you might need lxml
+            price_element = soup.find(selector_value)
+        else:
+            raise ValueError(f"Unsupported selector type: {selector_type}")
+        
+        if not price_element:
+            raise ValueError("Price element not found")
+        
+        price_text = price_element.get_text(strip=True)
+        current_price = parse_price(price_text)
+        
+        print(f"  ✅ Current price: R$ {current_price}")
+
+        with open(PRICES_FILE, 'r+') as f:
+            data = json.load(f)
+            price_history = data[product['name']]
+            today = datetime.today().strftime('%Y-%m-%d')
+            
+            # Find today's entry if it exists
+            today_entry = next((p for p in price_history if p['date'] == today), None)
+            
+            if not today_entry:
+                # First check today - create new entry
+                print("  📅 First check today")
+                previous_price = price_history[-1]['price'] if price_history else None
+                
+                new_entry = {"date": today, "price": current_price}
+                data[product['name']].append(new_entry)
+                
+                # Notify if price dropped from previous recording
+                if previous_price and float(current_price) < float(previous_price):
+                    print(f"  ⬇️ Price drop from last recording! (Was: R$ {previous_price})")
+                    notify_discord(product['name'], current_price, previous_price)
+                elif not price_history:
+                    notify_discord(product['name'], current_price)
+                
+            else:
+                # Subsequent check today
+                recorded_price = today_entry['price']
+                if float(current_price) < float(recorded_price):
+                    print(f"  ⬇️ Price drop detected today! (Was: R$ {recorded_price})")
+                    # Store old price before updating
+                    old_price = recorded_price
+                    today_entry['price'] = current_price
+                    notify_discord(product['name'], current_price, old_price)
+                else:
+                    print("  ➖ Price unchanged or higher today")
+            
+            # Write back to file
+            f.seek(0)
+            json.dump(data, f, indent=4)
+            f.truncate()
+            
+    except Exception as e:
+        print(f"  ❌ Failed: {str(e)}")
+        price_error += f"{product['name']}, "
+    finally:
+        time.sleep(2)  # Be polite with requests
+
+# Main execution
+if __name__ == '__main__':
+    print(f"Starting price check at {datetime.now()}")
+    price_error = ""
+    for product in products:
+        print(f"\n🔍 Trying to get product: {product['name']}")
+        get_price(product)
+    
+    if price_error:
+        print("\n❌ Failed components:", price_error)
+    print("\n✅ Price check complete")
