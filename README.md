@@ -9,6 +9,12 @@
 
 ### Important files / directories
 - pi.sh: File containing the commands used to configure the homelab
-- price-tracker: Directory with the web scraping scripts and Docker container configuration files
+- price-tracker: Directory with the web scraping scripts and Docker container configuration files. Currently able to get the price from the following websites:
+    - Amazon
+    - Kabum
+    - Magazine Luiza
+    - Mercado Livre
+    - Pichau
+    - Terabyte
+    - Web Continental
 - scripts: Directory with bash scripts for task automation
-
