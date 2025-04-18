@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # URL of the webpage you want to scrape
-url = 'https://www.extra.com.br/esteira-ergometrica-eletrica-gallant-elite-29hp-16km-h-130kg-127v-gee13/p/1568113930'
+url = 'https://example.com'  # Replace with the target URL
 
 # Send a GET request to the website
 response = requests.get(url)
@@ -15,7 +15,7 @@ if response.status_code == 200:
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Extract all headings (h1, h2, h3, etc.)
-    headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'])
+    headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
     # Loop through the headings and print them
     for heading in headings:

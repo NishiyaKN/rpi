@@ -56,7 +56,7 @@ def load_json_file(filename):
         return {} if 'prices' in filename else None
 
 def scrape_product_price(scraper, url):
-    """Simplified scraping function optimized for test"""
+    """Simplified scraping function optimized for aliexpress"""
     try:
         # Realistic headers
         headers = {
@@ -72,11 +72,11 @@ def scrape_product_price(scraper, url):
             soup = BeautifulSoup(response.text, 'html.parser')
 
             # Remove popup close button if exists
-            for close_button in soup.find_all(class_="close"):
-                close_button.decompose() 
+            # for close_button in soup.find_all(class_="close"):
+            #     close_button.decompose() 
 
-            # test price element
-            price_element = soup.find_all('span', class_='andes-money-amount__fraction')
+            # aliexpress price element
+            price_element = soup.find_all('span', class_='class="price--currentPriceText--V8_y_b5 pdp-comp-price-current product-price-value"')
 
             if price_element:
                 return convert_brl_to_decimal(price_element.get_text(strip=True))
@@ -95,12 +95,12 @@ def scrape_product_price(scraper, url):
         return 0.0
 
 def update_price_history():
-    products = load_json_file('test-products.json')
+    products = load_json_file('aliexpress-products.json')
     if not products:
-        print("❌ No products found in test-products.json")
+        print("❌ No products found in aliexpress-products.json")
         return
         
-    price_history = load_json_file('test-prices.json')
+    price_history = load_json_file('aliexpress-prices.json')
     scraper = create_custom_scraper()
     current_date = datetime.now().strftime("%Y-%m-%d")
     updated = False
@@ -156,7 +156,7 @@ def update_price_history():
             updated = True
     
     if updated:
-        with open('test-prices.json', 'w', encoding='utf-8') as f:
+        with open('aliexpress-prices.json', 'w', encoding='utf-8') as f:
             json.dump(price_history, f, indent=4, ensure_ascii=False)
         print("\n💾 Price history saved successfully")
     else:

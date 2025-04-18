@@ -56,7 +56,7 @@ def load_json_file(filename):
         return {} if 'prices' in filename else None
 
 def scrape_product_price(scraper, url):
-    """Simplified scraping function optimized for test"""
+    """Simplified scraping function optimized for webcontinental"""
     try:
         # Realistic headers
         headers = {
@@ -75,11 +75,12 @@ def scrape_product_price(scraper, url):
             for close_button in soup.find_all(class_="close"):
                 close_button.decompose() 
 
-            # test price element
-            price_element = soup.find_all('span', class_='andes-money-amount__fraction')
+            # webcontinental price element
+            price_elements = soup.find_all('span', class_='vtex-product-price-1-x-currencyInteger vtex-product-price-1-x-currencyInteger--boletopixtext')
 
-            if price_element:
-                return convert_brl_to_decimal(price_element.get_text(strip=True))
+            actual_price = price_elements[0].get_text(strip=True) + price_elements[1].get_text(strip=True) + '.00'
+            if actual_price:
+                return convert_brl_to_decimal(actual_price)
             
             # Check for unavailable products
             if soup.find(string=re.compile(r'(indispon[íi]vel|esgotado|unavailable)', re.I)):
@@ -95,12 +96,12 @@ def scrape_product_price(scraper, url):
         return 0.0
 
 def update_price_history():
-    products = load_json_file('test-products.json')
+    products = load_json_file('webcontinental-products.json')
     if not products:
-        print("❌ No products found in test-products.json")
+        print("❌ No products found in webcontinental-products.json")
         return
         
-    price_history = load_json_file('test-prices.json')
+    price_history = load_json_file('webcontinental-prices.json')
     scraper = create_custom_scraper()
     current_date = datetime.now().strftime("%Y-%m-%d")
     updated = False
@@ -156,7 +157,7 @@ def update_price_history():
             updated = True
     
     if updated:
-        with open('test-prices.json', 'w', encoding='utf-8') as f:
+        with open('webcontinental-prices.json', 'w', encoding='utf-8') as f:
             json.dump(price_history, f, indent=4, ensure_ascii=False)
         print("\n💾 Price history saved successfully")
     else:
