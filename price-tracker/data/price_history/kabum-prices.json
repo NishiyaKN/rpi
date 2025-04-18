@@ -1,0 +1,26 @@
+{
+    "RX 7600 Gigabyte Gaming OC": [
+        {
+            "date": "2025-04-17",
+            "price": 1999.99
+        }
+    ],
+    "RX 7600 XFX": [
+        {
+            "date": "2025-04-17",
+            "price": 1899.99
+        }
+    ],
+    "RX 7600 ASRock Steel Legend": [
+        {
+            "date": "2025-04-17",
+            "price": 2299.99
+        }
+    ],
+    "RX 7600 ASRock Challenger": [
+        {
+            "date": "2025-04-17",
+            "price": 2474.56
+        }
+    ]
+}
