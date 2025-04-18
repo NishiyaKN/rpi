@@ -208,51 +208,26 @@ rrset-cache-size: 64m
 sudo service unbound restart
 sudo service unbound status
 
+
 ### Pihole log file ###
 'https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/'
 
 vim /var/log/pihole.log
 
 ###########################################################
-### Python scripts ###
-
-cd 
-git clone https://github.com/KenichiNishiya/pyrice-logger.git
-
-# Change the username on those config files
-vi $HOME/rpi/auto/ba/ba-banner.service
-vi $HOME/pyrice-logger/asus/asus.service
-sudo cp $HOME/rpi/auto/ba/ba-banner.* /etc/systemd/system
-sudo cp $HOME/pyrice-logger/asus/asus.* /etc/systemd/system
-sudo systemctl enable --now ba-banner.timer
-sudo systemctl enable --now asus.timer
-
-# https://patrikmojzis.medium.com/how-to-run-selenium-using-python-on-raspberry-pi-d3fe058f011
-# https://stackoverflow.com/questions/32173839/easyprocess-easyprocesscheckinstallederror-cmd-xvfb-help-oserror-errno
-
-# sudo apt install xvfb
-# pip install xvfbwrapper pyvirtualdisplay
-
-# '
-# from pyvirtualdisplay import Display
-# display = Display(visible=0, size=(800, 600))
-# display.start()
-# '
-
-sudo apt install python3-numpy python3-selenium python3-plotly python3-pandas python3-bs4
-
-### GECKODRIVER ###
-# Download the ARM64 compatible binary
-wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux-aarch64.tar.gz
-
-# Extract and install
-tar -xvzf geckodriver-v0.34.0-linux-aarch64.tar.gz
-sudo mv geckodriver /usr/local/bin/
-sudo chmod +x /usr/local/bin/geckodriver
-
+### OpenMediaVault ###
+# https://pimylifeup.com/raspberry-pi-openmediavault/
 sudo apt update
-sudo apt install firefox-esr -y
+sudo apt upgrade
 
+wget -O - https://raw.githubusercontent.com/OpenMediaVault-Plugin-Developers/installScript/master/preinstall | sudo bash
+sudo reboot
+
+wget -O - https://raw.githubusercontent.com/OpenMediaVault-Plugin-Developers/installScript/master/install | sudo bash
+sudo reboot
+
+# Check which port it's running
+sudo grep listen /etc/nginx/sites-enabled/openmediavault-webgui
 
 ###########################################################
 ### ttyd (web based terminal) ###
