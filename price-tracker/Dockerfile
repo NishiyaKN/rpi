@@ -16,16 +16,16 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app files
-COPY src/*.py /app/
-COPY config/*.json /app/
-COPY dc /app/dc 
+# COPY src /app/
+# COPY dc /app/dc 
 
-RUN chmod 0666 /app/*.json /app/dc
+# RUN chmod 0777 /app
 
 # Set up cron job
-COPY ./docker/cronjob /etc/cron.d/price-tracker
+COPY cronjob /etc/cron.d/price-tracker
 RUN chmod 0644 /etc/cron.d/price-tracker
 
 # Apply cron job and start cron in foreground
 RUN crontab /etc/cron.d/price-tracker
+
 CMD ["cron", "-f"]

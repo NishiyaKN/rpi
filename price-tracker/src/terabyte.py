@@ -8,11 +8,14 @@ import random
 import subprocess
 
 # Configuration
-DELAY_BETWEEN_PRODUCTS = 15  # Base delay between products (seconds)
-MIN_DELAY = 10               # Minimum delay (seconds)
-MAX_DELAY = 25               # Maximum delay (seconds)
+DELAY_BETWEEN_PRODUCTS = 45  # Base delay between products (seconds)
+MIN_DELAY = 30               # Minimum delay (seconds)
+MAX_DELAY = 60               # Maximum delay (seconds)
 MAX_RETRIES = 3              # Max attempts per product
-REQUEST_TIMEOUT = 30         # Request timeout (seconds)
+REQUEST_TIMEOUT = 60         # Request timeout (seconds)
+
+PRICE_PATH = "price_history/kabum-prices.json"
+PRODUCT_PATH = "products/kabum-products.json"
 
 def create_custom_scraper():
     return cloudscraper.create_scraper(
@@ -95,12 +98,12 @@ def scrape_product_price(scraper, url):
         return 0.0
 
 def update_price_history():
-    products = load_json_file('terabyte-products.json')
+    products = load_json_file(PRODUCT_PATH)
     if not products:
-        print("❌ No products found in terabyte-products.json")
+        print("❌ No products found in " + PRODUCT_PATH)
         return
         
-    price_history = load_json_file('terabyte-prices.json')
+    price_history = load_json_file(PRICE_PATH)
     scraper = create_custom_scraper()
     current_date = datetime.now().strftime("%Y-%m-%d")
     updated = False
@@ -156,7 +159,7 @@ def update_price_history():
             updated = True
     
     if updated:
-        with open('terabyte-prices.json', 'w', encoding='utf-8') as f:
+        with open(PRICE_PATH, 'w', encoding='utf-8') as f:
             json.dump(price_history, f, indent=4, ensure_ascii=False)
         print("\n💾 Price history saved successfully")
     else:

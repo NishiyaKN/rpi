@@ -7,4 +7,4 @@ docker run -d --restart unless-stopped --name price-tracker price-tracker
 docker exec -ti price-tracker bash
 
 # Test the discord notification 
-python discord_notifier.py --component "RTX 4090" --new-price "8999.99" --old-price "9999.99" --url "https://example.com/product"
+python discord_notifier.py --component "Test Product" --new-price "8999.99" --old-price "9999.99" --url "https://example.com/product"

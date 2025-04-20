@@ -8,13 +8,14 @@ import random
 import subprocess
 
 # Configuration
-DELAY_BETWEEN_PRODUCTS = 15  # Base delay between products (seconds)
-# MIN_DELAY = 10               # Minimum delay (seconds)
-# MAX_DELAY = 25               # Maximum delay (seconds)
-MIN_DELAY = 0               # Minimum delay (seconds)
-MAX_DELAY = 0               # Maximum delay (seconds)
+DELAY_BETWEEN_PRODUCTS = 45  # Base delay between products (seconds)
+MIN_DELAY = 30               # Minimum delay (seconds)
+MAX_DELAY = 60               # Maximum delay (seconds)
 MAX_RETRIES = 3              # Max attempts per product
-REQUEST_TIMEOUT = 30         # Request timeout (seconds)
+REQUEST_TIMEOUT = 60         # Request timeout (seconds)
+
+PRICE_PATH = "price_history/mercadolivre-prices.json"
+PRODUCT_PATH = "products/mercadolivre-products.json"
 
 def create_custom_scraper():
     return cloudscraper.create_scraper(
@@ -30,23 +31,9 @@ def convert_brl_to_decimal(price_text):
     if not price_text:
         return 0.0
     
-    # Remove all non-digit characters except commas and dots
-    clean_str = re.sub(r'[^\d,.]', '', price_text)
-    
-    try:
-        # US format detection (comma as thousand, dot as decimal)
-        if '.' in clean_str and clean_str.find('.') > clean_str.find(','):
-            return float(clean_str.replace(',', ''))
-        
-        # BR format detection (dot as thousand, comma as decimal)
-        if ',' in clean_str:
-            return float(clean_str.replace('.', '').replace(',', '.'))
-        
-        # Plain number without separators
-        return float(clean_str)
-        
-    except ValueError:
-        return 0.0
+    # Remove all commas and dots, append .00 to the price
+    clean_str = float(re.sub(r'[,.]', '', price_text)+'.00')
+    return clean_str
 
 def load_json_file(filename):
     try:
@@ -56,51 +43,39 @@ def load_json_file(filename):
         return {} if 'prices' in filename else None
 
 def scrape_product_price(scraper, url):
-    """Simplified scraping function optimized for aliexpress"""
     try:
-        # Realistic headers
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Referer': 'https://www.google.com/',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-        }
-        
-        response = scraper.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+        response = scraper.get(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36...'
+        })
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-
-            # Remove popup close button if exists
-            # for close_button in soup.find_all(class_="close"):
-            #     close_button.decompose() 
-
-            # aliexpress price element
-            price_element = soup.find_all('span', class_='class="price--currentPriceText--V8_y_b5 pdp-comp-price-current product-price-value"')
-
-            if price_element:
-                return convert_brl_to_decimal(price_element.get_text(strip=True))
             
-            # Check for unavailable products
-            if soup.find(string=re.compile(r'(indispon[íi]vel|esgotado|unavailable)', re.I)):
-                return 0.0
-                
-            return 0.0  # Price not found
+            # Find ALL price elements
+            price_elements = soup.find_all('span', class_='andes-money-amount__fraction')
             
-        print(f"❌ HTTP Error {response.status_code}")
-        return 0.0
-        
+            if len(price_elements) >= 2:
+                # Get the SECOND occurrence (actual price)
+                actual_price = price_elements[1].get_text(strip=True)
+                return convert_brl_to_decimal(actual_price)
+            
+            elif price_elements:
+                # Fallback to first if only one exists
+                return convert_brl_to_decimal(price_elements[0].get_text(strip=True))
+            
+            return 0.0  # No price found
+            
     except Exception as e:
         print(f"⚠️ Scraping error: {str(e)}")
         return 0.0
 
 def update_price_history():
-    products = load_json_file('aliexpress-products.json')
+    products = load_json_file(PRODUCT_PATH)
     if not products:
-        print("❌ No products found in aliexpress-products.json")
+        print("❌ No products found in " + PRODUCT_PATH)
         return
         
-    price_history = load_json_file('aliexpress-prices.json')
+    price_history = load_json_file(PRICE_PATH)
     scraper = create_custom_scraper()
     current_date = datetime.now().strftime("%Y-%m-%d")
     updated = False
@@ -156,7 +131,7 @@ def update_price_history():
             updated = True
     
     if updated:
-        with open('aliexpress-prices.json', 'w', encoding='utf-8') as f:
+        with open(PRICE_PATH, 'w', encoding='utf-8') as f:
             json.dump(price_history, f, indent=4, ensure_ascii=False)
         print("\n💾 Price history saved successfully")
     else:

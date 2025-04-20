@@ -8,13 +8,14 @@ import random
 import subprocess
 
 # Configuration
-DELAY_BETWEEN_PRODUCTS = 15  # Base delay between products (seconds)
-MIN_DELAY = 10               # Minimum delay (seconds)
-MAX_DELAY = 25               # Maximum delay (seconds)
-# MIN_DELAY = 0               # Minimum delay (seconds)
-# MAX_DELAY = 0              # Maximum delay (seconds)
+DELAY_BETWEEN_PRODUCTS = 45  # Base delay between products (seconds)
+MIN_DELAY = 30               # Minimum delay (seconds)
+MAX_DELAY = 60               # Maximum delay (seconds)
 MAX_RETRIES = 3              # Max attempts per product
-REQUEST_TIMEOUT = 30         # Request timeout (seconds)
+REQUEST_TIMEOUT = 60         # Request timeout (seconds)
+
+PRICE_PATH = "price_history/webcontinental-prices.json"
+PRODUCT_PATH = "products/webcontinental-products.json"
 
 def create_custom_scraper():
     return cloudscraper.create_scraper(
@@ -56,7 +57,7 @@ def load_json_file(filename):
         return {} if 'prices' in filename else None
 
 def scrape_product_price(scraper, url):
-    """Simplified scraping function optimized for amazon"""
+    """Simplified scraping function optimized for webcontinental"""
     try:
         # Realistic headers
         headers = {
@@ -70,20 +71,23 @@ def scrape_product_price(scraper, url):
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Find ALL price elements
-            price_elements = soup.find_all('span', class_='a-price-whole')
-            # print(price_elements)
-            
-            if len(price_elements) >= 2:
-                actual_price = price_elements[3].get_text(strip=True)
+
+            # Remove popup close button if exists
+            for close_button in soup.find_all(class_="close"):
+                close_button.decompose() 
+
+            # webcontinental price element
+            price_elements = soup.find_all('span', class_='vtex-product-price-1-x-currencyInteger vtex-product-price-1-x-currencyInteger--boletopixtext')
+
+            actual_price = price_elements[0].get_text(strip=True) + price_elements[1].get_text(strip=True) + '.00'
+            if actual_price:
                 return convert_brl_to_decimal(actual_price)
             
-            # elif price_elements:
-            #     # Fallback to first if only one exists
-            #     return convert_brl_to_decimal(price_elements[0].get_text(strip=True))
-            
-            return 0.0  # No price found
+            # Check for unavailable products
+            if soup.find(string=re.compile(r'(indispon[íi]vel|esgotado|unavailable)', re.I)):
+                return 0.0
+                
+            return 0.0  # Price not found
             
         print(f"❌ HTTP Error {response.status_code}")
         return 0.0
@@ -93,12 +97,12 @@ def scrape_product_price(scraper, url):
         return 0.0
 
 def update_price_history():
-    products = load_json_file('amazon-products.json')
+    products = load_json_file(PRODUCT_PATH)
     if not products:
-        print("❌ No products found in amazon-products.json")
+        print("❌ No products found in " + PRODUCT_PATH)
         return
         
-    price_history = load_json_file('amazon-prices.json')
+    price_history = load_json_file(PRICE_PATH)
     scraper = create_custom_scraper()
     current_date = datetime.now().strftime("%Y-%m-%d")
     updated = False
@@ -154,7 +158,7 @@ def update_price_history():
             updated = True
     
     if updated:
-        with open('amazon-prices.json', 'w', encoding='utf-8') as f:
+        with open(PRICE_PATH, 'w', encoding='utf-8') as f:
             json.dump(price_history, f, indent=4, ensure_ascii=False)
         print("\n💾 Price history saved successfully")
     else:
