@@ -16,10 +16,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app files
-# COPY src /app/
-# COPY dc /app/dc 
+COPY src /app/
+COPY dc /app/dc 
 
-# RUN chmod 0777 /app
+RUN chmod 0777 /app
 
 # Set up cron job
 COPY cronjob /etc/cron.d/price-tracker
@@ -28,4 +28,5 @@ RUN chmod 0644 /etc/cron.d/price-tracker
 # Apply cron job and start cron in foreground
 RUN crontab /etc/cron.d/price-tracker
 
+# CMD ["tail", "-f", "/dev/null"]
 CMD ["cron", "-f"]
