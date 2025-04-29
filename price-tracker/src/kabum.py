@@ -146,10 +146,24 @@ def update_price_history():
             else:
                 print("🔄 Price unchanged or higher")
         else:
+            try:
+                previous_price = price_history[product_name][-1]['price']
+                if previous_price > current_price:
+                    subprocess.run([
+                        'python', 'discord_notifier.py',
+                        '--component', product_name,
+                        '--new-price', str(current_price),
+                        '--old-price', str(previous_price),
+                        '--url', url
+                    ])
+            except:
+                print("No price has ever been recorded to the file")
+
             price_history[product_name].append({
                 'date': current_date,
                 'price': current_price
             })
+
             updated = True
     
     if updated:
