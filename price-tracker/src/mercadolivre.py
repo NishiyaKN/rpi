@@ -109,7 +109,7 @@ def update_price_history():
                           if entry['date'] == current_date), None)
         
         if today_entry:
-            if today_entry['price'] < current_price:
+            if today_entry['price'] > current_price:
                 print(f"📈 Price changed from R$ {today_entry['price']:.2f}")
                 # Call discord notifier
                 subprocess.run([
