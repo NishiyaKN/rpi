@@ -9,10 +9,8 @@ import subprocess
 
 # Configuration
 DELAY_BETWEEN_PRODUCTS = 45  # Base delay between products (seconds)
-# MIN_DELAY = 30               # Minimum delay (seconds)
-# MAX_DELAY = 60               # Maximum delay (seconds)
-MIN_DELAY = 1               # Minimum delay (seconds)
-MAX_DELAY = 3               # Maximum delay (seconds)
+MIN_DELAY = 30               # Minimum delay (seconds)
+MAX_DELAY = 60               # Maximum delay (seconds)
 MAX_RETRIES = 3              # Max attempts per product
 REQUEST_TIMEOUT = 60         # Request timeout (seconds)
 

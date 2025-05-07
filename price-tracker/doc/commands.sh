@@ -1,7 +1,7 @@
 # Docker basic commands
 docker stop yzk && docker rm yzk
 docker build -t price-tracker .
-docker run -d --rm --name yzk -v app_data:/app price-tracker
+docker run -d --name yzk -v app_data:/app price-tracker
 docker exec -ti yzk bash
 
 # Check docker volume
