@@ -142,28 +142,34 @@ def update_price_history():
                 ])
                 today_entry['price'] = current_price
                 updated = True
+            elif today_entry['price'] < current_price:
+                print("🔺 Price increased - not updating")
             else:
-                print("🔄 Price unchanged or higher")
+                print("🔄 Price unchanged")
         else:
+            # No entry for today - add one
+            previous_price = None
             try:
                 previous_price = price_history[product_name][-1]['price']
-                if previous_price > current_price:
-                    subprocess.run([
-                        'python', 'discord_notifier.py',
-                        '--component', product_name,
-                        '--new-price', str(current_price),
-                        '--old-price', str(previous_price),
-                        '--url', url
-                    ])
-            except:
-                print("No price has ever been recorded to the file")
-
+            except (IndexError, KeyError):
+                print("➕ First price record for this product")
+            
+            # Only notify if price decreased from previous
+            if previous_price is not None and previous_price > current_price:
+                subprocess.run([
+                    'python', 'discord_notifier.py',
+                    '--component', product_name,
+                    '--new-price', str(current_price),
+                    '--old-price', str(previous_price),
+                    '--url', url
+                ])
+            
             price_history[product_name].append({
                 'date': current_date,
                 'price': current_price
             })
-
             updated = True
+            print(f"➕ Added new price record for today: R$ {current_price:.2f}")
     
     if updated:
         with open(PRICE_PATH, 'w', encoding='utf-8') as f:
