@@ -7,8 +7,8 @@ kitty +kitten ssh user@hostname.local
 ### CONFIGURE RASPBERRY PI ZERO 2 W ###
 
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git pip tmux chromium-chromedriver chromium-browser # on raw Debian its chromium and chromium-driver
-pip3 install beautifulsoup4 lxml pandas selenium requests
+sudo apt install -y git pip tmux sysstat
+pip3 install beautifulsoup4 lxml pandas requests
 
 ### Optional packages ###
 sudo apt install vim kitty
@@ -291,3 +291,4 @@ sudo dphys-swapfile swapoff
 
 # See if it's working
 swapon --show
+
