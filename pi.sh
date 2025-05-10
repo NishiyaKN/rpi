@@ -29,22 +29,40 @@ git config --global user.name "name"
 
 ###########################################################
 ### CONFIGURE ZRAM ###
-git clone https://github.com/foundObjects/zram-swap
-cd zram-swap
-sudo ./install.sh
-cd ..
-sudo mv zram-swap /opt
+sudo apt install systemd-zram-generator
 
-# Test if it's working
+# Change or create the systemd config for zram
+sudo vim /etc/systemd/zram-generator.conf
+
+# Add this
+'
+[zram0]
+zram-size = min(ram * 3 / 4, 4096)
+compression-algorithm = zstd
+swap-priority = 100
+'
+
+sudo systemctl daemon-reload
+sudo reboot
+
+# Confirm it's working
 zramctl
+swapon --show
 
-# See which compression algorithm it's using
-cat /sys/block/zram0/comp_algorithm
+###########################################################
+### Adjust swappiness ###
+sysctl vm.swappiness
+sudo vim /etc/sysctl.d/99-swappiness.conf
+# Add the following line:
+vm.swappiness=10
 
-# Change compression algorithm
-sudo vi /etc/default/zram-swap
-# Change to zstd for better compression ratio or lzo for best compression speed
-_zram_algorithm="lzo"
+###########################################################
+### Disable swap file ###
+
+sudo swapoff /var/swap
+sudo dphys-swapfile swapoff
+sudo dphys-swapfile uninstall
+sudo systemctl disable dphys-swapfile
 
 ###########################################################
 ### Lowering power consumption ###
@@ -270,25 +288,3 @@ docker --version
 sudo curl -l "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
-
-### ZSWAP ###
-
-sudo apt install zram-tools
-sudo systemctl enable --now zramswap
-sudo vi /etc/default/zramswap
-# Set priority to 100, algo to zstd for best compression/cpu balance, zlib for best compression, lz4 for best cpu speed
-# You can see available algo with:
-cat /sys/block/zram0/comp_algorithm
-
-# Disable swap usage (MAY NEED TO POWER OFF AND ON AGAIN)
-sudo swapoff -a
-
-# If swap is a partition, comment out in
-sudo vi /etc/fstab
-
-# If swap if a file, then
-sudo dphys-swapfile swapoff
-
-# See if it's working
-swapon --show
-
