@@ -25,6 +25,8 @@ RUN chmod 0777 /app
 COPY cronjob /etc/cron.d/price-tracker
 RUN chmod 0644 /etc/cron.d/price-tracker
 
+RUN touch /var/log/cron.log && chmod 0666 /var/log/cron.log
+
 # Apply cron job and start cron in foreground
 RUN crontab /etc/cron.d/price-tracker
 
