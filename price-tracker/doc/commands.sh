@@ -2,7 +2,7 @@
 docker stop yzk && docker rm yzk
 docker volume rm app_data
 docker build -t price-tracker .
-docker run -d --name yzk -v app_data:/app price-tracker
+docker run -d --restart unless-stopped --name yzk -v app_data:/app price-tracker
 docker exec -ti yzk bash
 
 # Check docker volume
