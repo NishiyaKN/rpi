@@ -31,4 +31,4 @@ RUN touch /var/log/cron.log && chmod 0666 /var/log/cron.log
 RUN crontab /etc/cron.d/price-tracker
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["cron", "-f"]
+CMD ["cron", "-f", "-L", "2"]
