@@ -54,7 +54,9 @@ swapon --show
 sysctl vm.swappiness
 sudo vim /etc/sysctl.d/99-swappiness.conf
 # Add the following line:
-vm.swappiness=10
+vm.swappiness=100
+
+sudo reboot
 
 ###########################################################
 ### Disable swap file ###
@@ -103,7 +105,7 @@ curl -sSL https://install.pi-hole.net | sudo bash
 # Go throught the installation process
 
 # Change the admin webpage password:
-pihole -a -p
+sudo pihole setpassord [passwd]
 
 # Go to the admin webpage on your browser
 http://[static IP]/admin
@@ -244,8 +246,31 @@ sudo reboot
 wget -O - https://raw.githubusercontent.com/OpenMediaVault-Plugin-Developers/installScript/master/install | sudo bash
 sudo reboot
 
+# network-manager will be removed, you need to connect to a HDMI monitor and run this command:
+sudo omv-firstaid
+# Configure the network
+sudo reboot
+
+# Default login:
+'
+admin
+openmediavault
+'
+
 # Check which port it's running
 sudo grep listen /etc/nginx/sites-enabled/openmediavault-webgui
+# If using with pihole, I recommend using the port 81 for omv
+
+# If using samba for file sharing
+sudo systemctl enable --now smbd
+
+# Set proper file permission (full access to everyone)
+sudo chmod -R 777 /path/to/shared_folder
+sudo chown -R nobody:nogroup /path/to/shared_folder
+
+# Enable sharing of the root / main disk
+# Install the plugin:
+'sharerootfs'
 
 ###########################################################
 ### ttyd (web based terminal) ###
