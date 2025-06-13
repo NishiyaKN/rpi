@@ -50,6 +50,20 @@ zramctl
 swapon --show
 
 ###########################################################
+### SWAP PARTITION ###
+sudo swapoff -a
+
+sudo umount /dev/sdXY
+# If the partition is not already a swap partition
+sudo mkswap /dev/sdXY
+
+sudo swapon /dev/sdXY
+swapon --show
+
+# To make it permanent
+echo '/dev/sdXY none swap sw,pri=10 0 0' | sudo tee -a /etc/fstab
+
+###########################################################
 ### Adjust swappiness ###
 sysctl vm.swappiness
 sudo vim /etc/sysctl.d/99-swappiness.conf
@@ -193,7 +207,9 @@ private-address: fe80::/10
 '
 
 sudo service unbound restart
-sudo service unbound status # Should say active (running)
+sudo service unbound status 
+# Should say active (running)
+
 # Test with
 dig google.com @127.0.0.1 -p 5335
 # On the 4th line, next to status it should be NOERROR
@@ -263,6 +279,7 @@ sudo grep listen /etc/nginx/sites-enabled/openmediavault-webgui
 
 # If using samba for file sharing
 sudo systemctl enable --now smbd
+# Note that omv will disable sbmd everytime a new shared folder is added
 
 # Set proper file permission (full access to everyone)
 sudo chmod -R 777 /path/to/shared_folder
@@ -313,3 +330,4 @@ docker --version
 sudo curl -l "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
+
