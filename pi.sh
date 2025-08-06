@@ -292,8 +292,7 @@ sudo chown -R nobody:nogroup /path/to/shared_folder
 ###########################################################
 ### ttyd (web based terminal) ###
 
-sudo apt-get update
-sudo apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev
+sudo apt install -y build-essential cmake git libjson-c-dev libwebsockets-dev
 git clone https://github.com/tsl0922/ttyd.git
 cd ttyd && mkdir build && cd build
 cmake ..
