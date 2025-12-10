@@ -330,3 +330,19 @@ sudo curl -l "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 
+###########################################################
+### PiVPN ###
+curl -L https://install.pivpn.io | bash 
+# Select WireGuard instead of OpenVPN
+# Select 'DNS Entry' instead of 'Public IP' if your ISP uses CGNAT
+# Create a free DDNS domain on duckdns.org and enter the newly created domain in the DNS Entry
+
+# Add a client profile to connect to the vpn
+pivpn add
+pivpn -qr
+# Install WireGuard to scan the QR code
+
+### Set up Port Forwarding ###
+# Default port is 51820
+# Protocol: UDP
+# Local IP: homeserver's IP
