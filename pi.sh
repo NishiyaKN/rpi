@@ -324,7 +324,6 @@ rrset-cache-size: 16m
 sudo service unbound restart
 sudo service unbound status
 
-
 ### Pihole log file ###
 'https://www.reddit.com/r/pihole/comments/sjl444/piholelog_is_10gb/'
 
@@ -447,5 +446,3 @@ rsync -av --progress /path/to/My_Linux_ISO/ zero@<PI_IP_ADDRESS>:/home/zero/tohe
 # Change permissions so transmission can access the files
 sudo chown -R debian-transmission:debian-transmission /home/zero/tohent/
 sudo chmod -R 775 /home/zero/tohent/
-
-
