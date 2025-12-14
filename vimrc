@@ -90,3 +90,25 @@ cnoremap df <C-C>
 map <F6> :setlocal spell! spelllang=en_us<CR>
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
+
+" --- OSC 52 Clipboard Integration (Fixed for RPi) ---
+
+function! Osc52Copy(text)
+  " 1. Convert text to base64 (remove newlines from the base64 output)
+  let text_b64 = system('base64 | tr -d "\n"', a:text)
+
+  " 2. Construct the OSC 52 escape sequence
+  "    We use the shell's printf to avoid Vim internal channel errors.
+  "    \033 is Escape, \007 is Bell (terminator).
+  call system('printf "\033]52;c;%s\007" ' . text_b64 . ' > /dev/tty')
+endfunction
+
+" Autocommand: Watch for ANY yank ('y') and copy it
+augroup Osc52Yank
+  autocmd!
+  " Trigger whenever text is yanked into the default register
+  autocmd TextYankPost * if v:event.operator ==# 'y' && v:event.regname ==# '' | call Osc52Copy(@") | endif
+augroup END
+
+" Map Leader+c to force copy just in case
+vnoremap <leader>c y:call Osc52Copy(@")<CR>
