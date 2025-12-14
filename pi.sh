@@ -135,6 +135,7 @@ sudo vi /etc/rc.local
 
 ###########################################################
 ### JOURNALCTL LOGGING OVER BOOTS ###
+# Tested but doesn't seem to work on rpi
 sudo mkdir -p /var/log/journal
 sudo vim /etc/systemd/journald.conf
 
@@ -182,8 +183,12 @@ sudo systemctl disable e2scrub_reap.service
 # SSH may be wating for DNS, but Pi-hole is the one who serves DNS, disable this: 
 echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config
 
+# Samba searches for AD
+sudo systemctl disable --now samba-ad-dc.service
+
 # Docker may ignore the 90s timeout to reboot, change it to kill it in less time
 sudo vim /etc/systemd/system.conf
+sudo vim /etc/systemd/user.conf
 '
 DefaultTimeoutStopSec=20s
 '
