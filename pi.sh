@@ -8,9 +8,9 @@ pip3 install beautifulsoup4 lxml pandas requests
 ### DOTFILES ###
 git clone https://github.com/NishiyaKN/rpi.git
 cd rpi
-cp vimrc ../.vimrc
-cp bash_aliases ../.bash_aliases
-cp tmux.conf ../.tmux.conf
+cp config/vimrc ../.vimrc
+cp config/bash_aliases ../.bash_aliases
+cp config/tmux.conf ../.tmux.conf
 tmux
 tmux source .tmux.conf
 
