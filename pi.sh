@@ -1,20 +1,12 @@
-#!/bin/bash
-# 68.7M RAM usage on idle
-# 1.4G disk usage
-### SSH with kitty ###
-kitty +kitten ssh user@hostname.local
-
-### CONFIGURE RASPBERRY PI ZERO 2 W ###
-
+###########################################################
+### RASPBERRY PI ZERO 2 W - INITIAL CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git pip tmux sysstat
+sudo apt install -y git pip tmux sysstat vim
+
 pip3 install beautifulsoup4 lxml pandas requests
 
-### Optional packages ###
-sudo apt install vim kitty
-
 ### DOTFILES ###
-git clone https://github.com/KenichiNishiya/rpi.git
+git clone https://github.com/NishiyaKN/rpi.git
 cd rpi
 cp vimrc ../.vimrc
 cp bash_aliases ../.bash_aliases
@@ -50,7 +42,32 @@ zramctl
 swapon --show
 
 ###########################################################
+### SWAP FILE ###
+# 2GB is enough for the Zero 2
+cd /srv/dev-disk-by-uuid-[YOUR-UUID]
+sudo dd if=/dev/zero of=swapfile bs=1M count=2048
+sudo chmod 600 swapfile
+sudo mkswap swapfile
+sudo swapon swapfile
+
+# Add to fstab
+sudo vim /etc/fstab
+'
+/srv/dev-disk-by-uuid-8502560a-6a08-44ad-bd7b-67168da70779/swapfile none swap sw 0 0
+'
+
+# Test if fstab is ok and will not die
+sudo findmnt --verify
+
+# Apply with
+sudo systemctl daemon-reload
+
+# Validated with
+swapon --show
+
+###########################################################
 ### SWAP PARTITION ###
+# Not recommended, unless running on HDD, otherwise prefer swapfile
 sudo swapoff -a
 
 sudo umount /dev/sdXY
@@ -68,13 +85,16 @@ echo '/dev/sdXY none swap sw,pri=10 0 0' | sudo tee -a /etc/fstab
 sysctl vm.swappiness
 sudo vim /etc/sysctl.d/99-swappiness.conf
 # Add the following line:
-vm.swappiness=100
+vm.swappiness=25
 
-sudo reboot
+sudo sysctl --system
+
+# Verify with
+cat /proc/sys/vm/swappiness
 
 ###########################################################
 ### Disable swap file ###
-
+# Helps to save SD card life
 sudo swapoff /var/swap
 sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
@@ -84,7 +104,7 @@ sudo systemctl disable dphys-swapfile
 ### Lowering power consumption ###
 'https://www.cnx-software.com/2021/12/09/raspberry-pi-zero-2-w-power-consumption/'
 
-sudo vi /boot/config.txt
+sudo vim /boot/firmware/config.txt
 
 # Disable audio L53
 dtparam=audio=off
@@ -95,8 +115,12 @@ camera_auto_detect=0
 # Disable display L59
 display_auto_detect=0
 
-# Leave more RAM to CPU intead of GPU, put anywhere:
+# Leave more RAM to CPU intead of GPU, put it in the end of the file:
 gpu_mem=16
+
+# Disable graphics drivers (comment out both)
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
 
 # Disable HDMI
 sudo raspi-config
@@ -108,6 +132,61 @@ sudo raspi-config
 sudo vi /etc/rc.local
 # Add the following line before exit 0:
 /usr/bin/tvservice -o
+
+###########################################################
+### JOURNALCTL LOGGING OVER BOOTS ###
+sudo mkdir -p /var/log/journal
+sudo vim /etc/systemd/journald.conf
+
+# Change these settings:
+'
+Storage=persistent
+SystemMaxFiles=10
+'
+sudo systemctl restart systemd-journald
+
+###########################################################
+### ENABLE WATCHDOG ###
+# It reboots the pi if the system ever hangs for some reason
+
+sudo vim /boot/firmware/config.txt
+# Paste somewhere in the file:
+'
+dtparam=watchdog=on
+'
+
+sudo vim /etc/systemd/system.conf
+# Uncomment and set to 14s (cannot be over 14s)
+'
+RuntimeWatchdogSec=14s
+'
+
+sudo reboot
+
+###########################################################
+### PI TAKING TOO LONG TO BOOT ###
+
+# Look what process are taking too much time
+systemctl-analyze blame
+
+# Tree style visualization, red ones are the problematic (possibly)
+systemctl-analyze critical-chain
+
+# openmediavault-issue.service > not useful for headless environment
+sudo systemctl disable openmediavault-issue.service
+sudo systemctl mask openmediavault-issue.service
+
+# e2scrub_reap > only used for LVM snapshots
+sudo systemctl disable e2scrub_reap.service
+
+# SSH may be wating for DNS, but Pi-hole is the one who serves DNS, disable this: 
+echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config
+
+# Docker may ignore the 90s timeout to reboot, change it to kill it in less time
+sudo vim /etc/systemd/system.conf
+'
+DefaultTimeoutStopSec=20s
+'
 
 ###########################################################
 ### Installing pihole ###
@@ -128,12 +207,12 @@ http://[static IP]/admin
 https://firebog.net/
 # Then go to Tools > Update Gravity in order to update the list
 
-# Rate limited
+### Rate limited ###
 sudo vi /etc/pihole/pihole-FTL.conf
 # Paste the following line to disable rate limit
 RATE_LIMIT=0/0
 
-# Set unbound
+### Set unbound ###
 sudo apt install unbound -y
 sudo vi /etc/unbound/unbound.conf.d/pi-hole.conf
 # Paste the following:
@@ -234,12 +313,13 @@ cache-size=0
 
 sudo vi /etc/unbound/unbound.conf.d/pi-hole.conf
 # Paste the following to the end of the file
-
+'
 cache-min-ttl: 0
 serve-expired: yes
 # the rrset-cache needs to be double the msg-cache. 8/16m for both would probably be enough
-msg-cache-size: 32m
-rrset-cache-size: 64m
+msg-cache-size: 8m
+rrset-cache-size: 16m
+'
 
 sudo service unbound restart
 sudo service unbound status
@@ -346,3 +426,26 @@ pivpn -qr
 # Default port is 51820
 # Protocol: UDP
 # Local IP: homeserver's IP
+
+###########################################################
+### Torrenting with Transmission ###
+# WebUI on port :9091
+
+sudo apt install transmission-daemon
+sudo systemctl stop transmission-daemon
+# Edit settings (must stop service first!)
+sudo vim /etc/transmission-daemon/settings.json
+# Change "rpc-whitelist-enabled": false, to allow access of the WebUI from your PC
+# Change "rpc-username" and "rpc-password"
+sudo systemctl start transmission-daemon
+
+### Relocating torrents ###
+
+# From the PC with the torrent file, run:
+rsync -av --progress /path/to/My_Linux_ISO/ zero@<PI_IP_ADDRESS>:/home/zero/tohent/
+
+# Change permissions so transmission can access the files
+sudo chown -R debian-transmission:debian-transmission /home/zero/tohent/
+sudo chmod -R 775 /home/zero/tohent/
+
+
