@@ -1,13 +1,39 @@
 ###########################################################
-### RASPBERRY PI ZERO 2 W - INITIAL CONFIGURATION ###
+### RASPBERRY PI ZERO 2 W - PRE-CONFIGURATION ###
+
+### No connection ###
+# Radio may be soft blocked
+rfkill list
+
+sudo rfkill unblock wifi
+sudo nmcli radio wifi on
+
+# Interface may be down
+ip link show wlan0
+
+sudo ip link set wlan0 up
+
+# Try to connect
+sudo nmcli dev wifi connect "YOUR_WIFI_NAME" password "YOUR_PASSWORD"
+
+### No SSH ###
+sudo systemctl enable --now ssh
+
+### SSH host identification has changed ###
+# Just remove the old SSH fingerprint
+ssh-keygen -R [IP-ADDRESS]
+
+###########################################################
+### RASPBERRY PI ZERO 2 W - SYSTEM CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git pip tmux sysstat vim
+sudo apt install -y git pip tmux sysstat vim dnsutils
 
 pip3 install beautifulsoup4 lxml pandas requests
 
 ### DOTFILES ###
 git clone https://github.com/NishiyaKN/rpi.git
 cd rpi
+cp -r docker ../
 cp config/vimrc ../.vimrc
 cp config/bash_aliases ../.bash_aliases
 cp config/tmux.conf ../.tmux.conf
@@ -18,6 +44,38 @@ tmux source .tmux.conf
 git config --global credential.helper store
 git config --global user.email "email"
 git config --global user.name "name"
+
+###########################################################
+### DOCKER ###
+# https://docs.docker.com/engine/install/debian/
+
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl start docker
+sudo systemctl enable docker
+
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker --version
 
 ###########################################################
 ### CONFIGURE ZRAM ###
@@ -84,13 +142,10 @@ echo '/dev/sdXY none swap sw,pri=10 0 0' | sudo tee -a /etc/fstab
 ### Adjust swappiness ###
 sysctl vm.swappiness
 sudo vim /etc/sysctl.d/99-swappiness.conf
-# Add the following line:
+'
 vm.swappiness=25
-
+'
 sudo sysctl --system
-
-# Verify with
-cat /proc/sys/vm/swappiness
 
 ###########################################################
 ### Disable swap file ###
@@ -127,7 +182,6 @@ sudo raspi-config
 'Advanced options -> GL driver'
 # Install whatever packages are needed, then select the following option:
 'G1 Legacy'
-
 
 sudo vi /etc/rc.local
 # Add the following line before exit 0:

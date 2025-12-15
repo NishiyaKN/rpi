@@ -1,0 +1,14 @@
+# --- Security (Never upload these) ---
+.env
+*.key
+*.pem
+id_rsa
+
+# --- Heavy Data (Never upload these) ---
+*.db
+*.db-journal
+*.log
+
+# --- System Junk ---
+.DS_Store
+Thumbs.db
