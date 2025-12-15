@@ -28,18 +28,11 @@ services:
   - name: "Infrastructure"
     icon: "fas fa-server"
     items:
-      - name: "OpenMediaVault"
-        logo: "assets/tools/omv.png"
-        subtitle: "NAS Management"
-        tag: "Storage"
-        url: "http://192.168.68.59:81" # CHANGE THIS IP
-        target: "_blank"
-
       - name: "Pi-hole"
         logo: "assets/tools/pihole.png"
         subtitle: "Ad-Blocker and DNS provider"
         tag: "DNS"
-        url: "http://192.168.68.59/admin" # CHANGE THIS IP
+        url: "http://192.168.68.59:81/admin" # CHANGE THIS IP
         target: "_blank"
 
       - name: "TTYD"
@@ -49,11 +42,17 @@ services:
         url: "http://192.168.68.59:3000" # CHANGE THIS IP
         target: "_blank"
 
-  - name: "Downloads"
+  - name: "Network"
     icon: "fas fa-download"
     items:
       - name: "Transmission"
         logo: "/assets/tools/transmission.png"
         subtitle: "Torrent Client"
         url: "http://192.168.68.59:9091" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "WireGuard"
+        logo: "/assets/tools/wireguard.png"
+        subtitle: "VPN Tunnel"
+        url: "http://192.168.68.59:51821" # CHANGE THIS IP
         target: "_blank"

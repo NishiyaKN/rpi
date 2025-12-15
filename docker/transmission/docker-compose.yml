@@ -1,0 +1,22 @@
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - USER=${TR_USER}
+      - PASS=${TR_PASS}
+    volumes:
+      - ./config:/config
+      # If you are going to torrent from the docker directory
+      # - ./downloads:/downloads
+      # - ./watch:/watch
+      - /mnt/ssd/transmission/downloads:/downloads
+      - /mnt/ssd/transmission/watch:/watch
+    ports:
+      - "9091:9091"           # Web Interface
+      - "51413:51413"         # Torrent traffic (TCP)
+      - "51413:51413/udp"     # Torrent traffic (UDP)
+    restart: unless-stopped

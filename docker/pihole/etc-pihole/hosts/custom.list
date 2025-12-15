@@ -1,0 +1,26 @@
+# Pi-hole: A black hole for Internet advertisements
+# (c) 2025 Pi-hole, LLC (https://pi-hole.net)
+# Network-wide ad blocking via your own hardware.
+#
+# Custom DNS entries (HOSTS file)
+#
+##################################################################################
+#                                                                                #
+#                     FILE AUTOMATICALLY POPULATED BY PI-HOLE                    #
+#    ANY CHANGES MADE TO THIS FILE WILL BE LOST WHEN THE CONFIGURATION CHANGES   #
+#                                                                                #
+#            IF YOU WISH TO CHANGE ANY OF THESE VALUES, CHANGE THEM IN           #
+#                             /etc/pihole/pihole.toml                            #
+#                             and restart pihole-FTL                             #
+#                                                                                #
+#           ANY OTHER CHANGES SHOULD BE MADE IN A SEPARATE CONFIG FILE           #
+#                       WITHIN /etc/dnsmasq.d/yourname.conf                      #
+#    (make sure misc.etc_dnsmasq_d is set to true in /etc/pihole/pihole.toml)    #
+#                                                                                #
+#                      Last updated: 2025-12-14 19:10:02 -03                     #
+#                              by FTL version v6.4.1                             #
+#                                                                                #
+##################################################################################
+
+
+# There are currently no entries in this file

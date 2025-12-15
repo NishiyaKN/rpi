@@ -1,5 +1,5 @@
 alias temp="$HOME/rpi/scripts/temp.sh"
 alias shutdown="sudo shutdown now"
 alias reboot="sudo reboot now"
-alias tp="$HOME/rpi/scripts/tel.sh"
-alias paka="$HOME/rpi/scripts/pak.sh"
+alias baka="$HOME/rpi/scripts/baka.sh"
+alias ay="vim $HOME/rpi/pi.sh"

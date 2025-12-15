@@ -100,9 +100,33 @@ zramctl
 swapon --show
 
 ###########################################################
+### ADD DRIVES ###
+lsblk -f
+# Copy the UUID of the drive
+
+sudo mkdir -p /mnt/ssd
+sudo chown -R 1000:1000 /mnt/ssd
+
+sudo vim /etc/fstab
+# Add in the end
+'
+UUID=YOUR-UUID-HERE  /mnt/ssd  ext4  defaults,noatime  0  2
+'
+
+sudo mount -a
+sudo systemctl daemon-reload
+
+# If using transmission:
+mkdir -p /mnt/ssd/transmission/downloads/complete
+mkdir -p /mnt/ssd/transmission/downloads/incomplete
+mkdir -p /mnt/ssd/transmission/watch
+
+sudo chown -R 1000:1000 /mnt/ssd/transmission
+
+###########################################################
 ### SWAP FILE ###
 # 2GB is enough for the Zero 2
-cd /srv/dev-disk-by-uuid-[YOUR-UUID]
+cd /mnt/ssd
 sudo dd if=/dev/zero of=swapfile bs=1M count=2048
 sudo chmod 600 swapfile
 sudo mkswap swapfile
@@ -111,7 +135,7 @@ sudo swapon swapfile
 # Add to fstab
 sudo vim /etc/fstab
 '
-/srv/dev-disk-by-uuid-8502560a-6a08-44ad-bd7b-67168da70779/swapfile none swap sw 0 0
+/mnt/ssd/swapfile  none  swap  sw  0  0
 '
 
 # Test if fstab is ok and will not die
@@ -122,6 +146,15 @@ sudo systemctl daemon-reload
 
 # Validated with
 swapon --show
+
+###########################################################
+### DISABLE LOCAL SWAPFILE ###
+# Helps to save SD card life
+# May or may not exist in your system by default
+sudo swapoff /var/swap
+sudo dphys-swapfile swapoff
+sudo dphys-swapfile uninstall
+sudo systemctl disable dphys-swapfile
 
 ###########################################################
 ### SWAP PARTITION ###
@@ -146,14 +179,6 @@ sudo vim /etc/sysctl.d/99-swappiness.conf
 vm.swappiness=25
 '
 sudo sysctl --system
-
-###########################################################
-### Disable swap file ###
-# Helps to save SD card life
-sudo swapoff /var/swap
-sudo dphys-swapfile swapoff
-sudo dphys-swapfile uninstall
-sudo systemctl disable dphys-swapfile
 
 ###########################################################
 ### Lowering power consumption ###
@@ -217,6 +242,53 @@ RuntimeWatchdogSec=14s
 '
 
 sudo reboot
+
+###########################################################
+### DOCKER SERVICES ###
+
+### HOMER ### 
+# Configure the correct IP addresses on assets/config.yml
+
+### PI HOLE ###
+# .env with 'PIHOLE_PASS'
+# Add more domains to adlist: https://firebog.net/
+# Set custom DNS server 'unbound%5335' on System > DNS > Custom DNS servers (disable any other DNS provider)
+
+### WIREGUARD ###
+# .env with 'DDNS', 'PASSWD', 'SERVER_IP', 'DUCKDNS_TOKEN' and 'DNS_SUBDOMAIN'
+# PASSWD needs the hashed password, get it with:
+docker run --rm -it ghcr.io/wg-easy/wg-easy wgpw 'YOUR_PASSWORD'
+
+### TTYD ###
+
+### TRANSMISSION ###
+# .evn with TR_USER and TR_PASS
+# If torrenting from directories different than docker's, refer to the 'ADD DRIVES' section
+
+###########################################################
+### PI SERVICES ###
+
+### SAMBA ###
+sudo apt install samba samba-common-bin -y
+
+sudo vim /etc/samba/smb.conf
+# Paste in the end
+'
+[ssd]
+path = /mnt/ssd
+writeable = yes
+browseable = yes
+create mask = 0777
+directory mask = 0777
+public = no
+force user = zero
+'
+# The last line prevents permission conflicts with Docker/Transmission
+
+# Create a SMB passwd (replace the user if needed)
+sudo smbpasswd -a zero
+
+sudo systemctl restart smbd
 
 ###########################################################
 ### PI TAKING TOO LONG TO BOOT ###
@@ -363,6 +435,9 @@ dig google.com @127.0.0.1 -p 5335
 # Go to the admin webpage
 'Side bar -> Settings -> DNS ->[clear upstream dns servers -> add Custom 1(IPv4) as [127.0.0.1#5335] -> save'
 
+# If using docker:
+'Side bar -> Settings -> DNS ->[clear upstream dns servers -> add Custom 1(IPv4) as [unbound#5335] -> save'
+
 ### Unbound optimization ### 
 'https://www.reddit.com/r/pihole/comments/d9j1z6/unbound_as_recursive_dns_server_slow_performance/'
 
@@ -440,38 +515,6 @@ ttyd --credential user:passwd --writable --port 3000 --cwd /home/zero bash
 
 sudo cp ~/rpi/auto/ttyd.service /etc/systemd/system/ttyd.service
 sudo systemctl enable --now ttyd.service
-
-###########################################################
-### DOCKER ###
-# https://docs.docker.com/engine/install/debian/
-
-# Add Docker's official GPG key:
-sudo apt update
-sudo apt install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/debian
-Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-sudo apt update
-
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-sudo systemctl start docker
-sudo systemctl enable docker
-
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker --version
 
 ###########################################################
 ### PiVPN ###

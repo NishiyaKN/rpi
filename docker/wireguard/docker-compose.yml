@@ -1,0 +1,41 @@
+services:
+  wg-easy:
+    environment:
+      # ⚠️ REPLACE THIS with your Public IP or DDNS hostname!
+      - WG_HOST=${DDNS}
+      
+      # Web UI Password (leave empty to not require a password, or set one)
+      # Generate the hash with this command:
+      # docker run --rm -it ghcr.io/wg-easy/wg-easy wgpw 'YOUR_PASSWORD'
+      - PASSWORD_HASH=${PASSWD}
+      
+      # Point VPN clients to your Pi-hole for DNS (Ad-blocking on the go!)
+      - WG_DEFAULT_DNS=${SERVER_IP}
+      
+      - WG_MTU=1280 # Safe setting for mobile networks
+      
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wireguard
+    volumes:
+      - ./config:/etc/wireguard
+    ports:
+      - "51820:51820/udp" # The VPN Tunnel
+      - "51821:51821/tcp" # The Web UI
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - SUBDOMAINS=${DNS_SUBDOMAIN}
+      - TOKEN=${DUCKDNS_TOKEN}
+      - LOG_FILE=false
+    restart: unless-stopped
