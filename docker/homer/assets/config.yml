@@ -39,7 +39,7 @@ services:
         icon: "fas fa-terminal"
         subtitle: "Terminal Access"
         tag: "System"
-        url: "http://192.168.68.59:3000" # CHANGE THIS IP
+        url: "http://192.168.68.59:7681" # CHANGE THIS IP
         target: "_blank"
 
   - name: "Network"

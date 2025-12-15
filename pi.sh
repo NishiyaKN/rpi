@@ -46,38 +46,6 @@ git config --global user.email "email"
 git config --global user.name "name"
 
 ###########################################################
-### DOCKER ###
-# https://docs.docker.com/engine/install/debian/
-
-# Add Docker's official GPG key:
-sudo apt update
-sudo apt install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/debian
-Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-sudo apt update
-
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-sudo systemctl start docker
-sudo systemctl enable docker
-
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker --version
-
-###########################################################
 ### CONFIGURE ZRAM ###
 sudo apt install systemd-zram-generator
 
@@ -244,6 +212,47 @@ RuntimeWatchdogSec=14s
 sudo reboot
 
 ###########################################################
+### DOCKER ###
+# https://docs.docker.com/engine/install/debian/
+
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl start docker
+sudo systemctl enable docker
+
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker --version
+
+###########################################################
+### DOCKER STATS NOT SHOWING RAM USAGE ###
+# This is done in the rpi to save some performance
+sudo vim /boot/firmware/cmdline.txt
+# Append to the end of the line
+cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+
+sudo reboot
+
+###########################################################
 ### DOCKER SERVICES ###
 
 ### HOMER ### 
@@ -288,7 +297,50 @@ force user = zero
 # Create a SMB passwd (replace the user if needed)
 sudo smbpasswd -a zero
 
+# Optionally, create a guest share
+'
+[guest_share]
+path = /mnt/ssd/guests
+writeable = no
+guest ok = yes
+guest only = yes
+read only = yes
+force user = zero
+'
+
 sudo systemctl restart smbd
+
+### TTYD ###
+sudo apt install -y build-essential cmake git libjson-c-dev libwebsockets-dev
+cd ~/.config
+git clone https://github.com/tsl0922/ttyd.git
+cd ttyd && mkdir build && cd build
+cmake ..
+make && sudo make install
+
+# Test with this (change the user and passwd)
+ttyd --credential user:passwd --writable --port 7681 --cwd /home/zero bash
+
+# Auto start with a systemd service (CHANGE THE USER AND PASSWD!!!!!!!!!!!)
+sudo vim /etc/systemd/system/ttyd.service
+'
+[Unit]
+Description=ttyd initializer
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=root
+Group=root
+ExecStart=/usr/local/bin/ttyd --credential user:passwd --writable --port 7681 --cwd /home/zero bash
+
+[Install]
+WantedBy=multi-user.target
+'
+sudo systemctl enable --now ttyd.service
 
 ###########################################################
 ### PI TAKING TOO LONG TO BOOT ###
@@ -502,19 +554,6 @@ sudo chown -R nobody:nogroup /path/to/shared_folder
 # Install the plugin:
 'sharerootfs'
 
-###########################################################
-### ttyd (web based terminal) ###
-
-sudo apt install -y build-essential cmake git libjson-c-dev libwebsockets-dev
-git clone https://github.com/tsl0922/ttyd.git
-cd ttyd && mkdir build && cd build
-cmake ..
-make && sudo make install
-
-ttyd --credential user:passwd --writable --port 3000 --cwd /home/zero bash
-
-sudo cp ~/rpi/auto/ttyd.service /etc/systemd/system/ttyd.service
-sudo systemctl enable --now ttyd.service
 
 ###########################################################
 ### PiVPN ###
