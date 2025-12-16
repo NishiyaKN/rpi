@@ -1,0 +1,16 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    user: 1000:1000
+    ports:
+      - "82:80"
+    volumes:
+      - /mnt/ssd:/srv
+      - ./config:/config
+    environment:
+      - FB_DATABASE=/config/filebrowser.db
+      - FB_ROOT=/srv
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true

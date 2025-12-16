@@ -7,7 +7,6 @@ header: true
 footer: false
 connectivityCheck: true # Pings endpoints to see if they are alive
 
-# Color Theme (Dark Mode by default)
 colors:
   dark:
     highlight-primary: "#3367d6"
@@ -23,7 +22,6 @@ colors:
     link: "#e1e1e1"
     link-hover: "#ffdd57"
 
-# Your Services
 services:
   - name: "Infrastructure"
     icon: "fas fa-server"
@@ -31,15 +29,19 @@ services:
       - name: "Pi-hole"
         logo: "assets/tools/pihole.png"
         subtitle: "Ad-Blocker and DNS provider"
-        tag: "DNS"
-        url: "http://192.168.68.59:81/admin" # CHANGE THIS IP
+        url: "http://192.168.68.4:81/admin" # CHANGE THIS IP
         target: "_blank"
 
       - name: "TTYD"
         icon: "fas fa-terminal"
         subtitle: "Terminal Access"
-        tag: "System"
-        url: "http://192.168.68.59:7681" # CHANGE THIS IP
+        url: "http://192.168.68.4:7681" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "File Browser"
+        logo: "assets/tools/filebrowser.png"
+        subtitle: "File Browser"
+        url: "http://192.168.68.4:82" # CHANGE THIS IP
         target: "_blank"
 
   - name: "Network"
@@ -48,11 +50,11 @@ services:
       - name: "Transmission"
         logo: "/assets/tools/transmission.png"
         subtitle: "Torrent Client"
-        url: "http://192.168.68.59:9091" # CHANGE THIS IP
+        url: "http://192.168.68.4:9091" # CHANGE THIS IP
         target: "_blank"
 
       - name: "WireGuard"
         logo: "/assets/tools/wireguard.png"
         subtitle: "VPN Tunnel"
-        url: "http://192.168.68.59:51821" # CHANGE THIS IP
+        url: "http://192.168.68.4:51821" # CHANGE THIS IP
         target: "_blank"

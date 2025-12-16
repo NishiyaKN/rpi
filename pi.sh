@@ -268,11 +268,14 @@ sudo reboot
 # PASSWD needs the hashed password, get it with:
 docker run --rm -it ghcr.io/wg-easy/wg-easy wgpw 'YOUR_PASSWORD'
 
-### TTYD ###
-
 ### TRANSMISSION ###
 # .evn with TR_USER and TR_PASS
 # If torrenting from directories different than docker's, refer to the 'ADD DRIVES' section
+
+### FILEBROWSER ###
+# First run it will print a password for the user 'admin', so watch the logs
+# Change the user and passwd in Settings > User Management
+# Password needs to be 12+ characters
 
 ###########################################################
 ### PI SERVICES ###

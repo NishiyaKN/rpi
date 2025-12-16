@@ -19,9 +19,13 @@ cp /home/zero/.vimrc "$BACKUP_DIR/"
 # Note the trailing slash on SOURCE_DIR/ to copy CONTENTS, not the folder itself
 rsync -av --delete \
     --exclude '.env' \
+    --exclude '.git' \
     --exclude '*.db' \
     --exclude '*.db-journal' \
-    --exclude '.git' \
+    --exclude '*.db-shm' \
+    --exclude '*.db-wal' \
+    --exclude 'logrotate' \
+    --exclude 'cli_pw' \
     --exclude 'wg0.conf' \
     --exclude 'wg0.json' \
     "$SOURCE_DIR/" "$BACKUP_DIR/docker/" >> "$LOG_FILE" 2>&1
