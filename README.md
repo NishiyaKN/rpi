@@ -13,7 +13,7 @@
 ```mermaid
 ---
 config:
-  layout: elk
+  layout: dagre
 ---
 flowchart TB
  subgraph Internet["Internet"]
@@ -27,11 +27,12 @@ flowchart TB
         UN["Unbound"]
         FB["File Browser"]
         DZ["Dozzle"]
-        OST["OpenSpeedTest"]
-        TR["Transmission"]
-        ST["Syncthing"]
-        WT["Watchtower"]
         DK["Doku"]
+        OST["OpenSpeedTest"]
+        ST["Syncthing"]
+        TR["Transmission"]
+        WT["Watchtower"]
+
   end
  subgraph subGraph2["Bare Metal Services"]
         SMB["SMB"]
@@ -59,23 +60,6 @@ flowchart TB
     WG -- 9091 --> TR
     WG -- 3000 --> OST
     WG -- 7681 --> TTYD
-
-     Phone:::ext
-     Laptop:::ext
-     Router:::hardware
-     WG:::docker
-     HM:::docker
-     PH:::docker
-     UN:::docker
-     FB:::docker
-     DZ:::docker
-     OST:::docker
-     TR:::docker
-     ST:::docker
-     WT:::docker
-     DK:::docker
-     SMB:::baremetal
-     TTYD:::baremetal
 
 ```
 
