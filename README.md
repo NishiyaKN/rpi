@@ -11,7 +11,7 @@
 
 ### System Architecture
 ```mermaid
-graph TDgraph TD
+graph TD
 
     subgraph Internet
         Phone["Smartphone (Remote)"]:::ext
