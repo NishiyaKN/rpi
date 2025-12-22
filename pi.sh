@@ -266,6 +266,7 @@ sudo reboot
 ### WIREGUARD ###
 # .env with 'DDNS', 'PASSWD', 'SERVER_IP', 'DUCKDNS_TOKEN' and 'DNS_SUBDOMAIN'
 # PASSWD needs the hashed password, get it with:
+# Need to open port 51820 UDP
 docker run --rm -it ghcr.io/wg-easy/wg-easy wgpw 'YOUR_PASSWORD'
 
 ### TRANSMISSION ###

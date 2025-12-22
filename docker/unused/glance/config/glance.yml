@@ -1,0 +1,24 @@
+theme:
+  background-color: 220 15 10   # Dark Grey-Blue
+  primary-color: 260 80 60      # Purple
+  text-color: 0 0 100           # White text
+pages:
+  - name: Home
+    columns:
+      - size: small
+        widgets:
+          - type: calendar
+          - type: weather
+            location: "Tokyo, Japan" # For your trip planning!
+      
+      - size: full
+        widgets:
+          - type: group
+            name: Media
+            links:
+              - title: Transmission
+                url: http://192.168.68.59:9091
+                icon: magnet
+              - title: Navidrome
+                url: http://192.168.68.59:4533
+                icon: music

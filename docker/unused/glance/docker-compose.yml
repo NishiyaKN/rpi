@@ -1,0 +1,11 @@
+services:
+  glance:
+    image: glanceapp/glance
+    container_name: glance
+    volumes:
+      - ./config:/app/config
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "85:8080" # Change to 85:8080 if 8080 is taken
+    restart: unless-stopped

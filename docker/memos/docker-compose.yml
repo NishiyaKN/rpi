@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    ports:
+      - "5230:5230"
+    volumes:
+      - ./memos:/var/opt/memos
+    environment:
+      - MEMOS_MODE=prod
+      - MEMOS_ADDR=0.0.0.0
+      - MEMOS_PORT=5230
+      - MEMOS_DATA=/var/opt/memos
+    restart: unless-stopped

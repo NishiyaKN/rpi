@@ -1,0 +1,12 @@
+services:
+  doku:
+    image: amerkurev/doku:latest
+    container_name: doku
+    environment:
+      - DOKU_IN_DOCKER=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/data:ro
+    ports:
+      - "84:9090" 
+    restart: unless-stopped

@@ -23,13 +23,56 @@ colors:
     link-hover: "#ffdd57"
 
 services:
-  - name: "Infrastructure"
-    icon: "fas fa-server"
+  - name: "Storage"
+    icon: "fas fa-hard-drive"
+    items:
+
+      - name: "File Browser"
+        logo: "assets/tools/filebrowser.png"
+        subtitle: "File Browser"
+        url: "http://192.168.68.4:82" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "Transmission"
+        logo: "/assets/tools/transmission.png"
+        subtitle: "Torrent Client"
+        url: "http://192.168.68.4:9091" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "Syncthing"
+        logo: "/assets/tools/syncthing.png"
+        subtitle: "Cross Device File Sync"
+        url: "http://192.168.68.4:8384" # CHANGE THIS IP
+        target: "_blank"
+
+  - name: "Network"
+    icon: "fas fa-network-wired"
     items:
       - name: "Pi-hole"
         logo: "assets/tools/pihole.png"
         subtitle: "Ad-Blocker and DNS provider"
         url: "http://192.168.68.4:81/admin" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "WireGuard"
+        logo: "/assets/tools/wireguard.png"
+        subtitle: "VPN Tunnel"
+        url: "http://192.168.68.4:51821" # CHANGE THIS IP
+        target: "_blank"
+
+      - name: "OpenSpeedTest"
+        logo: "/assets/tools/openspeedtest.png"
+        subtitle: "Server's Internet Speed Test"
+        url: "http://192.168.68.4:3000" # CHANGE THIS IP
+        target: "_blank"
+
+  - name: "Server"
+    icon: "fas fa-gears"
+    items:
+      - name: "Beszel"
+        logo: "/assets/tools/beszel.png"
+        subtitle: "Server Monitor"
+        url: "http://192.168.68.4:85" # CHANGE THIS IP
         target: "_blank"
 
       - name: "TTYD"
@@ -38,23 +81,11 @@ services:
         url: "http://192.168.68.4:7681" # CHANGE THIS IP
         target: "_blank"
 
-      - name: "File Browser"
-        logo: "assets/tools/filebrowser.png"
-        subtitle: "File Browser"
-        url: "http://192.168.68.4:82" # CHANGE THIS IP
-        target: "_blank"
-
-  - name: "Network"
-    icon: "fas fa-download"
+  - name: "Others"
+    icon: "fab fa-docker"
     items:
-      - name: "Transmission"
-        logo: "/assets/tools/transmission.png"
-        subtitle: "Torrent Client"
-        url: "http://192.168.68.4:9091" # CHANGE THIS IP
-        target: "_blank"
-
-      - name: "WireGuard"
-        logo: "/assets/tools/wireguard.png"
-        subtitle: "VPN Tunnel"
-        url: "http://192.168.68.4:51821" # CHANGE THIS IP
+      - name: "Memos"
+        logo: "assets/tools/memos.png"
+        subtitle: "Note taking app"
+        url: "http://192.168.68.4:5230" # CHANGE THIS IP
         target: "_blank"

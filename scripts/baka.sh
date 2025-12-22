@@ -28,6 +28,7 @@ rsync -av --delete \
     --exclude 'cli_pw' \
     --exclude 'wg0.conf' \
     --exclude 'wg0.json' \
+    --exclude '*ed25519' \
     "$SOURCE_DIR/" "$BACKUP_DIR/docker/" >> "$LOG_FILE" 2>&1
 
 # Git Push (Only if changes exist)

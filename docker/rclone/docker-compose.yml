@@ -1,0 +1,16 @@
+services:
+  rclone:
+    image: rclone/rclone:latest
+    container_name: rclone-gui
+    # This command starts the Web UI mode
+    command: rcd --rc-web-gui --rc-addr :5572 --rc-user zero --rc-pass password --rc-web-gui-no-open-browser --rc-allow-origin "*"
+    ports:
+      - "5572:5572"
+    volumes:
+      - ./config:/config/rclone
+      - /mnt/ssd:/data:ro  # Mount your SSD so you can see files
+      # Map other folders you want to backup/access here
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
