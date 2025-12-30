@@ -39,12 +39,6 @@ services:
         url: "http://192.168.68.4:9091" # CHANGE THIS IP
         target: "_blank"
 
-      - name: "Syncthing"
-        logo: "/assets/tools/syncthing.png"
-        subtitle: "Cross Device File Sync"
-        url: "http://192.168.68.4:8384" # CHANGE THIS IP
-        target: "_blank"
-
   - name: "Network"
     icon: "fas fa-network-wired"
     items:

@@ -78,7 +78,7 @@ sudo chown -R 1000:1000 /mnt/ssd
 sudo vim /etc/fstab
 # Add in the end
 '
-UUID=YOUR-UUID-HERE  /mnt/ssd  ext4  defaults,noatime  0  2
+UUID=YOUR-UUID-HERE  /mnt/ssd  ext4  defaults,noatime,nofail  0  2
 '
 
 sudo mount -a
@@ -182,7 +182,7 @@ sudo vi /etc/rc.local
 
 ###########################################################
 ### JOURNALCTL LOGGING OVER BOOTS ###
-# Tested but doesn't seem to work on rpi
+# NOT YET WORKING
 sudo mkdir -p /var/log/journal
 sudo vim /etc/systemd/journald.conf
 
@@ -197,6 +197,8 @@ sudo systemctl restart systemd-journald
 ### ENABLE WATCHDOG ###
 # It reboots the pi if the system ever hangs for some reason
 
+sudo apt update && sudo apt install watchdog -y
+
 sudo vim /boot/firmware/config.txt
 # Paste somewhere in the file:
 '
@@ -209,8 +211,30 @@ sudo vim /etc/systemd/system.conf
 RuntimeWatchdogSec=14s
 '
 
-sudo reboot
+sudo vim /etc/watchdog.conf
+# Uncomment and set
+'
+watchdog-device = /dev/watchdog
+watchdog-timeout = 15
+max-load-1 = 24
+'
 
+sudo systemctl enable --now watchdog
+
+###########################################################
+### DISABLE WIFI POWER MANAGEMENT MODE ###
+# If the pi suddenly becomes unaccessible on the network, this may be the culprit, check with
+iwconfig
+
+# Disable permanently 
+sudo vim /etc/rc.local
+'
+#!/bin/sh -e
+# --- DISABLE WIFI POWER MANAGEMENT ---
+/sbin/iw dev wlan0 set power_save off
+# -------------------------------------
+exit 0
+'
 ###########################################################
 ### DOCKER ###
 # https://docs.docker.com/engine/install/debian/
@@ -374,6 +398,18 @@ sudo vim /etc/systemd/user.conf
 '
 DefaultTimeoutStopSec=20s
 '
+
+###########################################################
+### AUTO WIREGUARD ON/OFF ON ANDROID - WIREGUARD CONFIGURATION###
+
+# On Tasker
+# Create Profile > State > Net > Wifi Connected > SSID: [] > Active: Any
+# New Task > VPN OFF > Tasker > Tasker Function > WireGuardSetTunnel > Tunnel Up: No > Tunnel Name: []
+# Long press the "VPN OFF" on the profile > Exit Task > VPN ON > Tasker Function > WireGuardSetTunnel > Tunnel Up: Yes > Tunnel Name: []
+
+# On WireGuard
+# Settings > Advanced > Allow remote control apps
+# Click on the VPN tunnel > Edit > Exclude application > Select Tasker > Save
 
 ###########################################################
 ### Installing pihole ###
