@@ -26,7 +26,7 @@ config:
 ---
 flowchart TB
  subgraph Internet["Internet"]
-        Phone["Smartphone (Remote)"]
+        Phone["Smartphone"]
         Cloud["Cloud Server"]
   end
  subgraph subGraph1["Docker Stack"]
