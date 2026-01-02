@@ -22,7 +22,7 @@ This repository hosts the configuration files and scripts from my local and clou
 ### Cloud Server
 - Telegram API script: checks if local server is reachable from the internet, alerts on Telegram if it's down or up
 
-## System Architecture
+## Environment Architecture
 ```mermaid
 ---
 config:
@@ -79,7 +79,7 @@ flowchart TB
 - docker: Directory with all my docker-compose files and related configuration
 - config: Local server configuration files
 - scripts: Directory with bash scripts for task automation
-    - tg_server_checks: Uses Telegram API to alert if my local server is unaccessible
+    - tg_server_checks.sh: Checks server disponibility and send alerts on Telegram
     - speedtest-log.sh: Periodically tests local server internet speed
     - speedlog.sh: Shows historic data of internet speed test
 - price-tracker: Directory with the web scraping scripts and Docker container configuration files. Currently able to get the price from the following websites:
