@@ -44,6 +44,7 @@ flowchart TB
  subgraph subGraph2["Bare Metal Services"]
         SMB["SMB"]
         TTYD["TTYD"]
+        F2B["Fail2Ban"]
   end
  subgraph subGraph3["Iroha (Raspberry Pi Zero 2)"]
     direction TB
