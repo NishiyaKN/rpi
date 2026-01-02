@@ -54,11 +54,11 @@ services:
         url: "http://192.168.68.4:51821" # CHANGE THIS IP
         target: "_blank"
 
-      - name: "OpenSpeedTest"
-        logo: "/assets/tools/openspeedtest.png"
-        subtitle: "Server's Internet Speed Test"
-        url: "http://192.168.68.4:3000" # CHANGE THIS IP
-        target: "_blank"
+#      - name: "OpenSpeedTest"
+#        logo: "/assets/tools/openspeedtest.png"
+#        subtitle: "Server's Internet Speed Test"
+#        url: "http://192.168.68.4:3000" # CHANGE THIS IP
+#        target: "_blank"
 
   - name: "Server"
     icon: "fas fa-gears"
