@@ -26,7 +26,8 @@ ssh-keygen -R [IP-ADDRESS]
 ###########################################################
 ### RASPBERRY PI ZERO 2 W - SYSTEM CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git pip tmux sysstat vim dnsutils
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest
 
 pip3 install beautifulsoup4 lxml pandas requests
 
@@ -44,6 +45,35 @@ tmux source .tmux.conf
 git config --global credential.helper store
 git config --global user.email "email"
 git config --global user.name "name"
+
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo vim /etc/fail2ban/jail.local
+# Change sshd section to this
+'
+[sshd]
+enabled = true
+port    = ssh
+filter  = sshd
+backend = systemd
+maxretry = 5
+bantime = 1h
+'
+# Find this line, uncomment and add
+'
+ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16
+'
+
+sudo systemctl enable --now fail2ban
+
+# You can see how many bots have been stopped with this
+sudo fail2ban-client status sshd
+
+###########################################################
+### CROND ###
+sudo crontab -e
+
+0 * * * * /home/zero/rpi/scripts/speedtest-log.sh
+0 * * * * /home/zero/rpi/scripts/baka.sh
 
 ###########################################################
 ### CONFIGURE ZRAM ###

@@ -34,16 +34,17 @@ rsync -av --delete \
 # Git Push (Only if changes exist)
 cd "$BACKUP_DIR" || exit
 
-# Check if there are changes before committing
-if [[ -n $(git status -s) ]]; then
-    git add .
-    git commit -m "Backup: $(date +'%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1
+git add -A
 
+if ! git diff --cached --quiet; then
+    echo "Changes detected (including potential updates to pi.sh or folders)" >> "$LOG_FILE"
+    
+    git commit -m "Backup: $(date +'%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1
     git push origin main >> "$LOG_FILE" 2>&1
     
     echo "Success: Changes pushed." >> "$LOG_FILE"
 else
-    echo "Info: No changes to backup." >> "$LOG_FILE"
+    echo "Info: No changes detected in any files." >> "$LOG_FILE"
 fi
 
 echo "---------------------------------" >> "$LOG_FILE"

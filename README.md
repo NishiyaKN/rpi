@@ -65,6 +65,7 @@ flowchart TB
 
 ### Important files / directories
 - pi.sh: Documentation of my homelab configuration
+- alma.sh: Documentation of my OCI instance
 - price-tracker: Directory with the web scraping scripts and Docker container configuration files. Currently able to get the price from the following websites:
     - Amazon
     - Kabum
