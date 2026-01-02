@@ -1,7 +1,8 @@
-## Hybrid Server Environment - Raspberry Pi Zero 2 + Oracle Cloud
+# Hybrid Server Environment - Raspberry Pi Zero 2 + Oracle Cloud
 This repository hosts the configuration files and scripts from my local and cloud servers
 
-### Services being used
+## Services being used
+### Local Server
 #### Bare metal
 - Samba: File sharing
 - TTYD: Web interface to interact with the homelab
@@ -18,7 +19,10 @@ This repository hosts the configuration files and scripts from my local and clou
 - DuckDNS: DDNS auto updater
 - Memos: Note taking 
 
-### System Architecture
+### Cloud Server
+- Telegram API script: checks if local server is reachable from the internet, alerts on Telegram if it's down or up
+
+## System Architecture
 ```mermaid
 ---
 config:
@@ -69,12 +73,15 @@ flowchart TB
 
 ```
 
-### Important files / directories
+## Important files / directories
 - pi.sh: Documentation of my homelab configuration
 - alma.sh: Documentation of my OCI instance
 - docker: Directory with all my docker-compose files and related configuration
 - config: Local server configuration files
 - scripts: Directory with bash scripts for task automation
+    - tg_server_checks: Uses Telegram API to alert if my local server is unaccessible
+    - speedtest-log.sh: Periodically tests local server internet speed
+    - speedlog.sh: Shows historic data of internet speed test
 - price-tracker: Directory with the web scraping scripts and Docker container configuration files. Currently able to get the price from the following websites:
     - Amazon
     - Kabum
