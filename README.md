@@ -1,5 +1,5 @@
 ## Hybrid Server Environment - Raspberry Pi Zero 2 + Oracle Cloud
-This repository hosts the configuratino files and scripts from my local and cloud servers
+This repository hosts the configuration files and scripts from my local and cloud servers
 
 ### Services being used
 #### Bare metal
@@ -35,12 +35,10 @@ flowchart TB
         PH["️Pi-hole DNS"]
         UN["Unbound"]
         FB["File Browser"]
-        DZ["Dozzle"]
-        DK["Doku"]
-        OST["OpenSpeedTest"]
-        ST["Syncthing"]
         TR["Transmission"]
         WT["Watchtower"]
+        MM["Memos"]
+        BZ["Beszel"]
 
   end
  subgraph subGraph2["Bare Metal Services"]
@@ -63,11 +61,9 @@ flowchart TB
     WG -- 81 --> PH
     PH -- 5335 --> UN
     WG -- 82 --> FB
-    WG -- 83 --> DZ
-    WG -- 84 --> DK
-    WG -- 8384 --> ST
+    WG -- 85 --> BZ
+    WG -- 5230 --> MM
     WG -- 9091 --> TR
-    WG -- 3000 --> OST
     WG -- 7681 --> TTYD
 
 ```
