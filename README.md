@@ -56,7 +56,7 @@ flowchart TB
         subGraph3
   end
     Phone -- VPN Tunnel --> Router
-    Laptop -- VPN Tunnel --> Router
+    Cloud -- VPN Tunnel --> Router
     Router -- 51820 --> WG
     WG -- 80 --> HM
     WG -- 81 --> PH
