@@ -1,13 +1,22 @@
-## Configuration files for my homelab
-**Running in a Raspberry Pi Zero 2**
+## Hybrid Server Environment - Raspberry Pi Zero 2 + Oracle Cloud
+This repository hosts the configuratino files and scripts from my local and cloud servers
 
 ### Services being used
-- OpenMediaVault: NAS setup for file sharing and backup
-- Pi-hole (with unbound): Local DNS server with filtering
-- PiVPN: Private connection from mobile phone to the server
-- Docker: Container environment for python web scraping scripts
+#### Bare metal
+- Samba: File sharing
 - TTYD: Web interface to interact with the homelab
+- Fail2Ban: Authentication security
+
+#### Containerized (Docker)
+- Pi-hole (+ unbound): Local DNS server with filtering
+- Wireguard: Private connection from any device to my local server
 - Transmission: Torrent client
+- File Browser: File Browser...
+- Beszel: Server and Docker containers monitoring
+- Homer: Web homepage
+- Watchtower: Auto updater for Docker images
+- DuckDNS: DDNS auto updater
+- Memos: Note taking 
 
 ### System Architecture
 ```mermaid
