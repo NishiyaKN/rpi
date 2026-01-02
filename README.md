@@ -27,7 +27,7 @@ config:
 flowchart TB
  subgraph Internet["Internet"]
         Phone["Smartphone (Remote)"]
-        Laptop["Laptop (Remote)"]
+        Cloud["Cloud Server"]
   end
  subgraph subGraph1["Docker Stack"]
         WG["WireGuard VPN"]
