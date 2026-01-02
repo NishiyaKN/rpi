@@ -71,9 +71,10 @@ sudo fail2ban-client status sshd
 ###########################################################
 ### CROND ###
 sudo crontab -e
+* * * * * /home/zero/rpi/scripts/speedtest-log.sh
 
-0 * * * * /home/zero/rpi/scripts/speedtest-log.sh
-0 * * * * /home/zero/rpi/scripts/baka.sh
+crontab -e
+* * * * * /home/zero/rpi/scripts/baka.sh
 
 ###########################################################
 ### CONFIGURE ZRAM ###
