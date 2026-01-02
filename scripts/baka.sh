@@ -12,8 +12,8 @@ LOG_FILE="/home/zero/backup_log.txt"
 echo "--- Backup started: $(date) ---" >> "$LOG_FILE"
 
 # Copy Dotfiles
-cp /home/zero/.bash_aliases "$BACKUP_DIR/"
-cp /home/zero/.vimrc "$BACKUP_DIR/"
+cp /home/zero/.bash_aliases "$BACKUP_DIR/config"
+cp /home/zero/.vimrc "$BACKUP_DIR/config"
 
 # Rsync (Fixed Security & Paths)
 # Note the trailing slash on SOURCE_DIR/ to copy CONTENTS, not the folder itself
