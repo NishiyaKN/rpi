@@ -69,6 +69,12 @@ services:
         url: "http://192.168.68.4:85" # CHANGE THIS IP
         target: "_blank"
 
+      - name: "Beszel2"
+        logo: "/assets/tools/beszel.png"
+        subtitle: "Server Monitor"
+        url: "http://10.8.0.4:8090" # CHANGE THIS IP
+        target: "_blank"
+
       - name: "TTYD"
         icon: "fas fa-terminal"
         subtitle: "Terminal Access"
