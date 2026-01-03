@@ -43,6 +43,7 @@ git config --global credential.helper store
 git config --global user.email "email"
 git config --global user.name "name"
 
+### Fail2Ban
 sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 sudo vim /etc/fail2ban/jail.local
 # Change sshd section to this
@@ -64,6 +65,16 @@ sudo systemctl enable --now fail2ban
 
 # You can see how many bots have been stopped with this
 sudo fail2ban-client status sshd
+
+### MiniDLNA ###
+sudo vim /etc/minidlna.conf
+'
+media_dir=V,/mnt/ssd/anime
+
+friendly_name=iroha
+
+inotify=yes
+'
 
 ###########################################################
 ### CROND ###
