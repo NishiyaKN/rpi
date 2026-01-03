@@ -53,3 +53,6 @@ sudo chmod +x /usr/local/bin/tg_server_check.sh
 '
 * * * * * /usr/local/bin/tg_server_check.sh
 '
+### FIREWALLD ###
+sudo dnf in firewalld
+sudo systemctl enable --now firewalld
