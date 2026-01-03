@@ -9,7 +9,7 @@ This repository hosts the configuration files and scripts from my local and clou
 - Samba: File sharing
 - TTYD: Web interface to interact with the homelab
 - Fail2Ban: Authentication security
-- MiniDLNA: 
+- MiniDLNA: Local multimedia share service
 
 #### Containerized (Docker)
 - Pi-hole (+ unbound): Local DNS server with filtering
