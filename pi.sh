@@ -27,7 +27,7 @@ ssh-keygen -R [IP-ADDRESS]
 ### RASPBERRY PI ZERO 2 W - SYSTEM CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest minidlna iotop
+sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest minidlna iotop iftop
 
 pip3 install beautifulsoup4 lxml pandas requests
 
