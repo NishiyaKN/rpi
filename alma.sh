@@ -53,6 +53,27 @@ sudo chmod +x /usr/local/bin/tg_server_check.sh
 '
 * * * * * /usr/local/bin/tg_server_check.sh
 '
+####################################################
 ### FIREWALLD ###
 sudo dnf in firewalld
 sudo systemctl enable --now firewalld
+
+####################################################
+### DOCKER ###
+sudo dnf remove -y podman podman-docker buildah skopeo
+sudo dnf install -y dnf-plugins-core ca-certificates curl gnupg2
+
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+
+### Error when enabling via systemd - xt_addrtype ###
+# This happens due to the transition of iptables to nftables, force Docker to use the latter:
+sudo vim /etc/docker/daemon.json
+'
+{
+  "iptables": "true"
+}
+'
