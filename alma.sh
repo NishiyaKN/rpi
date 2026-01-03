@@ -71,9 +71,16 @@ sudo usermod -aG docker $USER
 
 ### Error when enabling via systemd - xt_addrtype ###
 # This happens due to the transition of iptables to nftables, force Docker to use the latter:
+modprobe xt_addrtype
+
+# If it works, then force it to load on boot
+echo "xt_addrtype" | sudo tee /etc/modules-load.d/docker.conf
+echo "br_netfilter" | sudo tee -a /etc/modules-load.d/docker.conf
+
+# If loading the module don't work
 sudo vim /etc/docker/daemon.json
 '
 {
-  "iptables": "true"
+  "iptables": "false"
 }
 '
