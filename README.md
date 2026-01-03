@@ -9,6 +9,7 @@ This repository hosts the configuration files and scripts from my local and clou
 - Samba: File sharing
 - TTYD: Web interface to interact with the homelab
 - Fail2Ban: Authentication security
+- MiniDLNA: 
 
 #### Containerized (Docker)
 - Pi-hole (+ unbound): Local DNS server with filtering
@@ -50,6 +51,7 @@ flowchart TB
  subgraph subGraph2["Bare Metal Services"]
         SMB["SMB"]
         F2B["Fail2Ban"]
+        MDLNA["MiniDLNA"]
         TTYD["TTYD"]
   end
  subgraph subGraph3["Iroha (Raspberry Pi Zero 2)"]
@@ -72,6 +74,7 @@ flowchart TB
     PH -- 5335 --> UN
     WG -- 9091 --> TR
     WG -- 7681 --> TTYD
+    WG -- 8200 --> MDLNA
 
 ```
 
