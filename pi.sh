@@ -80,6 +80,12 @@ sudo systemctl enable --now minidlna
 # Manually for media
 sudo minidlnad -R
 
+### CHRONY ###
+sudo systemctl enable chrony
+
+# Test if it's working
+chronyc tracking
+
 ###########################################################
 ### CROND ###
 sudo crontab -e
