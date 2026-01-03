@@ -27,7 +27,7 @@ ssh-keygen -R [IP-ADDRESS]
 ### RASPBERRY PI ZERO 2 W - SYSTEM CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest
+sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest minidlna
 
 pip3 install beautifulsoup4 lxml pandas requests
 
@@ -35,11 +35,8 @@ pip3 install beautifulsoup4 lxml pandas requests
 git clone https://github.com/NishiyaKN/rpi.git
 cd rpi
 cp -r docker ../
-cp config/vimrc ../.vimrc
-cp config/bash_aliases ../.bash_aliases
-cp config/tmux.conf ../.tmux.conf
-tmux
-tmux source .tmux.conf
+cp config/.vimrc ../.vimrc
+cp config/.bash_aliases ../.bash_aliases
 
 # Commit on github without the need to type the credentials
 git config --global credential.helper store
