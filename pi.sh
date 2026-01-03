@@ -75,6 +75,10 @@ friendly_name=iroha
 
 inotify=yes
 '
+sudo systemctl enable --now minidlna
+
+# Manually for media
+sudo minidlnad -R
 
 ###########################################################
 ### CROND ###
