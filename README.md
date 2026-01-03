@@ -3,6 +3,7 @@ This repository hosts the configuration files and scripts from my local and clou
 
 ## Services being used
 ### Local Server
+<img width="1729" height="715" alt="image" src="https://github.com/user-attachments/assets/daea0e3f-73b5-49ea-85b2-7a680b2b1336" />
 #### Bare metal
 - Samba: File sharing
 - TTYD: Web interface to interact with the homelab
@@ -47,8 +48,8 @@ flowchart TB
   end
  subgraph subGraph2["Bare Metal Services"]
         SMB["SMB"]
-        TTYD["TTYD"]
         F2B["Fail2Ban"]
+        TTYD["TTYD"]
   end
  subgraph subGraph3["Iroha (Raspberry Pi Zero 2)"]
     direction TB
@@ -64,10 +65,10 @@ flowchart TB
     Router -- 51820 --> WG
     WG -- 80 --> HM
     WG -- 81 --> PH
-    PH -- 5335 --> UN
     WG -- 82 --> FB
     WG -- 85 --> BZ
     WG -- 5230 --> MM
+    PH -- 5335 --> UN
     WG -- 9091 --> TR
     WG -- 7681 --> TTYD
 
