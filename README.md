@@ -4,6 +4,7 @@ This repository hosts the configuration files and scripts from my local and clou
 ## Services being used
 ### Local Server
 <img width="1729" height="715" alt="image" src="https://github.com/user-attachments/assets/daea0e3f-73b5-49ea-85b2-7a680b2b1336" />
+
 #### Bare metal
 - Samba: File sharing
 - TTYD: Web interface to interact with the homelab
