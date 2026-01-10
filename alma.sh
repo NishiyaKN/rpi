@@ -30,6 +30,15 @@ swapon --show
 sudo vim /etc/wireguard/wg0.conf
 sudo wg-quick up wg0
 
+# Prevent it from dying after some time
+sudo systemctl enable wg-quick@wg0
+sudo systemctl edit wg-quick@wg0
+# Place this in the correct place, otherwise it will be discarded
+'
+[Service]
+Restart=on-failure
+RestartSec=5s
+'
 ####################################################
 ### SERVER CHECK WITH TELEGRAM ###
 # Message @BotFather on Telegram

@@ -27,7 +27,7 @@ ssh-keygen -R [IP-ADDRESS]
 ### RASPBERRY PI ZERO 2 W - SYSTEM CONFIGURATION ###
 sudo apt update && sudo apt upgrade -y
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest minidlna iotop iftop
+sudo apt install -y git pip tmux sysstat vim dnsutils chrony fail2ban speedtest minidlna iotop iftop wireguard
 
 pip3 install beautifulsoup4 lxml pandas requests
 
@@ -85,6 +85,124 @@ sudo systemctl enable chrony
 
 # Test if it's working
 chronyc tracking
+
+### WIREGUARD WITH WEB UI ###
+# Change for the lateste version
+wget https://github.com/ngoduykhanh/wireguard-ui/releases/download/v0.6.2/wireguard-ui-v0.6.2-linux-arm64.tar.gz
+
+tar -xvf wireguard-ui-*-linux-arm64.tar.gz
+sudo mv wireguard-ui /usr/local/bin/
+sudo chmod +x /usr/local/bin/wireguard-ui
+rm wireguard-ui-*-linux-arm64.tar.gz
+
+sudo vim /etc/wireguard/db/users/admin.json
+'
+{
+  "username": "<username>",
+  "password": "<password>",
+  "password_hash": "",
+  "admin": true
+}
+'
+
+sudo vim /etc/systemd/system/wireguard-ui.service
+'
+[Unit]
+Description=WireGuard UI
+After=network.target
+
+[Service]
+Type=simple
+# "0.0.0.0" allows access from your LAN. Change to "127.0.0.1" if using Nginx proxy.
+EnvironmentFile=etc/wireguard-ui/env
+ExecStart=/usr/local/bin/wireguard-ui --bind-address 0.0.0.0:5000
+WorkingDirectory=/etc/wireguard
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+'
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now wireguard-ui
+
+# Access it on your.ip.addr:5000 and configure this on 'Wireguard Server'
+# Post Up Script
+iptables -I FORWARD 1 -i wg0 -j ACCEPT; iptables -I FORWARD 1 -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+# Post Down Script
+iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o wlan0 -j MASQUERADE
+
+# Initiate
+sudo wg-quick up wg0
+
+### WIFI USB DONGLE Realtek RTL8821CU (rtw88_8821cu) ###
+echo "options rtw88_core disable_lps_deep=y" | sudo tee /etc/modprobe.d/rtw88.conf
+sudo modprobe -r rtw88_8821cu
+sudo modprobe rtw88_8821cu
+
+# Create the connection bound to the USB interface
+sudo nmcli connection add type wifi con-name "Wifi_USB" ifname wlan1 ssid "<WIFI NAME>" # Check if the dongle really is named wlan1
+sudo nmcli connection modify "Wifi_USB" wifi-sec.key-mgmt wpa-psk
+sudo nmcli connection modify "Wifi_USB" wifi-sec.psk "<WIFI PASSWD>"
+
+# Disable "Protected Management Frames" (Deco stuff)
+sudo nmcli connection modify "Wifi_USB" wifi-sec.pmf 0
+
+# Force WPA2 security
+sudo nmcli connection modify "Wifi_USB" wifi-sec.key-mgmt wpa-psk
+
+sudo systemctl restart NetworkManager
+sudo nmcli connection up "Wifi_USB"
+
+# Disconnect old device
+sudo nmcli device disconnect wlan0
+
+### Fail Over ###
+# Get the original interface MAC Address (<YOUR_INTERNAL_MAC>)
+cat /sys/class/net/wlan0/address
+
+# Create the Internal Profile
+sudo nmcli connection add type wifi con-name "Wifi_Internal" ifname wlan0 ssid "<WIFI NAME>"
+sudo nmcli connection modify "Wifi_Internal" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "<WIFI PASSWD>"
+sudo nmcli connection modify "Wifi_Internal" connection.autoconnect-priority 50
+
+# Spoof MAC
+sudo nmcli connection modify "Wifi_USB" connection.autoconnect-priority 100
+
+# Set the spoofing (Replace YOUR_INTERNAL_MAC with the address from Step 1)
+sudo nmcli connection modify "Wifi_USB" 802-11-wireless.cloned-mac-address <YOUR_INTERNAL_MAC>
+
+# Make the internal WiFi 'expensive' so the OS avoids it if USB is there
+sudo nmcli connection modify "Wifi_Internal" ipv4.route-metric 2000
+
+# Create the failover script
+sudo vim /etc/NetworkManager/dispatcher.d/99-wifi-failover
+'
+#!/bin/bash
+# Interface that changed state
+INTERFACE=$1
+# New state (up, down, etc.)
+STATUS=$2
+
+# Logic:
+# If USB (wlan1) comes UP -> Kill Internal (wlan0)
+# If USB (wlan1) goes DOWN -> Wake Internal (wlan0)
+
+if [ "$INTERFACE" = "wlan1" ]; then
+    case "$STATUS" in
+        up)
+            # USB is live, shut down internal to prevent loop/IP conflict
+            nmcli device disconnect wlan0
+            ;;
+        down|pre-down)
+            # USB is dead, bring internal back up
+            nmcli device connect wlan0
+            ;;
+    esac
+fi
+'
+sudo chmod +x /etc/NetworkManager/dispatcher.d/99-wifi-failover
 
 ###########################################################
 ### CROND ###
@@ -336,7 +454,7 @@ sudo reboot
 # Add more domains to adlist: https://firebog.net/
 # Set custom DNS server 'unbound%5335' on System > DNS > Custom DNS servers (disable any other DNS provider)
 
-### WIREGUARD ###
+### WIREGUARD (NOT USED AS A DOCKER SERVICE ANYMORE) ###
 # .env with 'DDNS', 'PASSWD', 'SERVER_IP', 'DUCKDNS_TOKEN' and 'DNS_SUBDOMAIN'
 # PASSWD needs the hashed password, get it with:
 # Need to open port 51820 UDP
