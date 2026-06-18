@@ -69,7 +69,7 @@ sudo fail2ban-client status sshd
 ### MiniDLNA ###
 sudo vim /etc/minidlna.conf
 '
-media_dir=V,/mnt/ssd/anime
+media_dir=/mnt/ssd/anime
 
 friendly_name=iroha
 
