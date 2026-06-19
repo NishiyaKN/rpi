@@ -69,7 +69,7 @@ sudo fail2ban-client status sshd
 ### MiniDLNA ###
 sudo vim /etc/minidlna.conf
 '
-media_dir=/mnt/ssd/anime
+media_dir=V,/mnt/ssd/anime
 
 friendly_name=iroha
 
@@ -114,7 +114,7 @@ After=network.target
 [Service]
 Type=simple
 # "0.0.0.0" allows access from your LAN. Change to "127.0.0.1" if using Nginx proxy.
-EnvironmentFile=etc/wireguard-ui/env
+EnvironmentFile=/etc/wireguard-ui/env
 ExecStart=/usr/local/bin/wireguard-ui --bind-address 0.0.0.0:5000
 WorkingDirectory=/etc/wireguard
 Restart=always
